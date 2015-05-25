@@ -49,6 +49,7 @@ class Myci{
 	
 	function logout($redirect){
 		$this->ci->input->set_cookie($this->session);
+		$this->ci->input->set_cookie($this->session.'_name');
 		redirect($redirect);
 	}
 	
