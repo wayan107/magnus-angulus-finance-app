@@ -592,3 +592,11 @@ a.circle-button:hover{
 }
 
 .puput-bg .page-header, .puput-bg form label, .puput-bg form .title{color:#fff;}
+
+span.status-complete i {
+  color: lime;
+}
+
+span.status-on-going i {
+  color: yellow;
+}

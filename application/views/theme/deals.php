@@ -64,9 +64,20 @@ if($show=='form'){
 			<div class="row">
 				<div class="block">
 					<div class="col-sm-12">
-						<input type="radio" id="radio1" name="payment_status" <?php echo (empty($payment_status) || $payment_status==0) ? 'checked' : ''; ?> value="0"> <label for="radio1">On Going</label>
-						<br>
-						<input type="radio" id="radio2" name="payment_status" <?php echo ($payment_status==1) ? 'checked' : ''; ?> value="1"> <label for="radio2">Complete</label>
+						<?php
+							if($is_payment_complete){
+								$class="status-complete";
+								$title="Complete";
+								$status_class="fa-check-square";
+							}else{
+								$class="status-on-going";
+								$title="On Going";
+								$status_class="fa-refresh";
+							}
+						?>
+						<span title="<?php echo $title; ?>" class="<?php echo $class; ?>">
+							<i class="fa fa-4x <?php echo $status_class; ?>"></i>
+						</span>
 					</div>
 				</div>
 			</div>

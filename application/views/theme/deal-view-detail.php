@@ -12,7 +12,22 @@
 			</div>
 			<div class="col-sm-3">
 				<h3>Payment Status</h3>
-				<p><?php echo ($dt['payment_status']==0) ? 'On Going' : 'Complete'; ?></p>
+				<p>
+					<?php
+						if($is_payment_complete){
+							$class="status-complete";
+							$title="Complete";
+							$status_class="fa-check-square";
+						}else{
+							$class="status-on-going";
+							$title="On Going";
+							$status_class="fa-refresh";
+						}
+					?>
+					<span title="<?php echo $title; ?>" class="<?php echo $class; ?>">
+						<i class="fa fa-4x <?php echo $status_class; ?>"></i>
+					</span>
+				</p>
 			</div>
 			<div class="col-sm-3">
 				<h3>Deposit In</h3>

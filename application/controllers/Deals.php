@@ -10,7 +10,7 @@ class Deals extends CI_Controller{
 		private $textbox=array('id','villa_code','client','owner','checkin_date','checkout_date','deal_date',
 								'deal_price','deal_price_currency','consult_fee','consult_fee_currency','area',
 								'deposit','deposit_currency','deposit_in','contract_number','sales_agent','listing_agent',
-								'payment_status','date_created','remark');
+								'date_created','remark');
 		
 	public function __construct(){
 		parent::__construct();
@@ -33,6 +33,7 @@ class Deals extends CI_Controller{
 		$data['fee_plan_currency'] = '';
 		$data['fee_plan_date'] = '';
 		//---------------------------------------------
+		$data['is_payment_complete'] = false;
 		$data['_page_title'] = $this->page_name;
 		$data['readonly']='';
 		$data['show']='form';
@@ -96,6 +97,7 @@ class Deals extends CI_Controller{
 		}
 		$data['fee_payment_plan_query'] = $query_fee_plan->result_array();
 		
+		$data['is_payment_complete'] = $this->_is_payment_complete($id);
 		$data['_page_title'] = $this->page_name;
 		$data['readonly']='readonly';
 		$data['show']='form';
@@ -165,6 +167,7 @@ class Deals extends CI_Controller{
 		$data['page']=$this->myci->page($this->tabel,$this->limit,$this->controller,3);
 		$data['show']='data';
 		$data['tabel']=$this->myci->table_admin($query,$field,$table_header,$this->controller,$this->primary,true);
+		//$data['is_payment_complete'] = $this->_is_payment_complete();
 		$this->myci->display_adm('theme/'.$this->view,$data);
 	}
 	
@@ -220,7 +223,18 @@ class Deals extends CI_Controller{
 											where d.id="'.$id.'"');
 		$data['deal_payment_plan']=$this->db->query('select * from fn_payment_plan where deal_id="'.$id.'" and type="deal"');
 		$data['fee_payment_plan']=$this->db->query('select * from fn_payment_plan where deal_id="'.$id.'" and type="fee"');
+		$data['is_payment_complete'] = $this->_is_payment_complete($id);
 		$this->load->view('theme/deal-view-detail',$data);
+	}
+	
+	private function _is_payment_complete($id){
+		$query = $this->db->query('select count(id) as unpaid from fn_payment_plan where deal_id="'.$id.'" and paid="0" and type="fee"');
+		$row = $query->row();
+		if($row->unpaid>0)
+			return false;
+		
+		return true;
+		//return $row->unpaid;
 	}
 }
 ?>
