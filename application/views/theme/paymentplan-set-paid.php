@@ -6,17 +6,17 @@
 			<div class="col-sm-12">
 				<p>
 					<label>Paid Amount</label>
-					<input type="number" name="paid_amount" id="paid_amount">
+					<input type="number" name="paid_amount" id="paid_amount" value="<?php echo $row->amount; ?>">
 				</p>
 				
 				<p>
 				<label>Currency</label>
-				<?php echo form_dropdown('currency',unserialize(CURRENCY),'','id="currency"'); ?>
+				<?php echo form_dropdown('currency',unserialize(CURRENCY),$row->currency,'id="currency"'); ?>
 				</p>
 				
 				<p>
 				<label>Pay Date</label>
-				<input type="text" name="pay_date" class="datepicker" id="pay_date">
+				<input type="text" name="pay_date" class="datepicker" id="pay_date" value="<?php echo $row->date; ?>">
 				</p>
 				
 				<p>

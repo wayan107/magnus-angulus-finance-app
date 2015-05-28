@@ -88,7 +88,8 @@
 		}
 		
 		public function opensetform($id){
-			$this->load->view('theme/paymentplan-set-paid',array('id'=>$id));
+			$query = $this->db->query('select amount,currency,date from fn_payment_plan where id="'.$id.'"');
+			$this->load->view('theme/paymentplan-set-paid',array('id'=>$id,'row'=>$query->row()));
 		}
 		
 		public function generateinvoice($id){
