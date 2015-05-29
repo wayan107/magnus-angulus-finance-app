@@ -18,12 +18,14 @@ class Dashboard extends CI_Controller {
 		if($this->myci->is_user_logged_in()){
 			$data['_page_title'] = 'Dashboard';
 			$data['fee'] = $this->_get_total_income();
-			$data['deal'] = $this->_get_number_of_deals();
+			$data['money_in'] = $this->money('in');
+			$data['money_on_going'] = $this->money('on');
 			$this->myci->display_adm('theme/dashboard',$data);
 		}
 	}
 	
 	private function _get_total_income(){
+
 		$query = $this->db->query('SELECT FORMAT(SUM(
 									CASE
 										WHEN consult_fee_currency="USD" THEN consult_fee*'.$this->usd_rate.'
@@ -40,5 +42,44 @@ class Dashboard extends CI_Controller {
 	private function _get_number_of_deals(){
 		$query = $this->db->query('SELECT COUNT(id) as total from fn_deals WHERE EXTRACT(MONTH FROM deal_date)="'.date('m').'"');
 		return $query->row();
+	}
+	
+	private function _get_total_amount_deal(){
+		$query = $this->db->query('SELECT FORMAT(SUM(
+									CASE
+										WHEN deal_price_currency="USD" THEN deal_price*'.$this->usd_rate.'
+										WHEN deal_price_currency="EUR" THEN deal_price*'.$this->eur_rate.'
+										WHEN deal_price_currency="AUD" THEN deal_price*'.$this->aud_rate.'
+										ELSE deal_price
+									END
+									),0) as deal_price
+									from fn_deals
+									WHERE EXTRACT(MONTH FROM deal_date)="'.date('m').'"');
+		return $query->row();
+	}
+	
+	private function money($type){
+		if($type=='in'){
+			$currency = 'payment_currency';
+			$field = 'paid_amount';
+			$where = 'pay_date';
+		}elseif($type=='on'){
+			$currency = 'currency';
+			$field = 'amount';
+			$where = 'date';
+		}
+		
+		$query = $this->db->query('SELECT FORMAT(SUM(
+									CASE
+										WHEN '.$currency.'="USD" THEN '.$field.'*'.$this->usd_rate.'
+										WHEN '.$currency.'="EUR" THEN '.$field.'*'.$this->eur_rate.'
+										WHEN '.$currency.'="AUD" THEN '.$field.'*'.$this->aud_rate.'
+										ELSE '.$field.'
+									END
+									),0) as amount
+									from fn_payment_plan
+									WHERE EXTRACT(MONTH FROM '.$where.')="'.date('m').'"');
+		$row = $query->row();
+		return $row->amount;
 	}
 }
