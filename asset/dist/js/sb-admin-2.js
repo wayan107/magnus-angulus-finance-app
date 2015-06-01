@@ -130,9 +130,26 @@ jQuery(document).ready(function(){
 	
 	function override(){
 		jQuery('.remove-plan').click(function(){
-			jQuery(this).parent().parent().slideUp('fast',function(){
-				jQuery(this).remove();
-			});
+			var id = jQuery(this).attr('rel');
+			if(id!=''){
+				var obj = jQuery(this);
+				obj.removeClass('fa-minus-circle').addClass('fa-spinner fa-pulse');
+				jQuery.ajax({
+					type	: 'POST',
+					url		: baseurl+'deals/delete_payment_plan/',
+					data	: {'id':id},
+					success	: function(e){
+						jQuery(obj).parent().parent().slideUp('fast',function(){
+							jQuery(this).remove();
+						});
+					}
+				});
+			}else{
+				jQuery(obj).parent().parent().slideUp('fast',function(){
+						jQuery(this).remove();
+					});
+			}
+			
 		});
 	}
 	
@@ -140,7 +157,7 @@ jQuery(document).ready(function(){
 	
 	jQuery('.add-plan').click(function(){
 		var prefix=jQuery(this).attr('rel');
-		jQuery(this).before('<div class="plan"><div class="col-sm-5"><input type="number" name="'+prefix+'amount[]" required value="" class="form-control small-common-box"></div><div class="col-sm-2"><select name="'+prefix+'currency[]" class="form-control small-currency-box" required=""><option value="" selected="selected">Choose</option><option value="IDR">IDR</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="AUD">AUD</option></select></div><div class="col-sm-4"><input type="text" name="'+prefix+'date[]" required class="datepicker form-control small-common-box"></div><div class="col-sm-1"><i class="fa fa-minus-circle remove-plan"></i></div></div>');
+		jQuery(this).before('<div class="plan"><div class="col-sm-5"><input type="hidden" name="'+prefix+'payment_id[]" value="null"><input type="number" name="'+prefix+'amount[]" required value="" class="form-control small-common-box"></div><div class="col-sm-2"><select name="'+prefix+'currency[]" class="form-control small-currency-box" required=""><option value="" selected="selected">Choose</option><option value="IDR">IDR</option><option value="USD">USD</option><option value="EUR">EUR</option><option value="AUD">AUD</option></select></div><div class="col-sm-4"><input type="text" name="'+prefix+'date[]" required class="datepicker form-control small-common-box"></div><div class="col-sm-1"><i class="fa fa-minus-circle remove-plan"></i></div></div>');
 		override();
 		jQuery( ".datepicker" ).datepicker();
 	});
@@ -205,7 +222,7 @@ jQuery(document).ready(function(){
 					success	: function(e){
 						obj.removeClass('fa fa-circle-o-notch fa-spin').addClass('activate');
 						obj.attr('title','Unpaid');
-						obj.next().remove();
+						obj.parent().find('.button-view').remove();
 					}
 				});
 			}

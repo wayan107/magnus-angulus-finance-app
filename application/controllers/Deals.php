@@ -122,9 +122,7 @@ class Deals extends CI_Controller{
 		$data['deposit_in']=$date->format('Y-m-d');
 		
 		$this->mydb->update($this->tabel,$data,$this->primary,$id);
-		$this->_delete_payment_plans($id);
 		$this->_save_payment_plans($id);
-		//redirect($this->redirect);
 		echo"<script>alert('Data Updated Successfully'); window.location='".base_url().$this->redirect."'</script>";
 	}
 	
@@ -167,49 +165,73 @@ class Deals extends CI_Controller{
 		$data['page']=$this->myci->page($this->tabel,$this->limit,$this->controller,3);
 		$data['show']='data';
 		$data['tabel']=$this->myci->table_admin($query,$field,$table_header,$this->controller,$this->primary,true);
-		//$data['is_payment_complete'] = $this->_is_payment_complete();
 		$this->myci->display_adm('theme/'.$this->view,$data);
 	}
 	
 	private function _save_payment_plans($deal_id){
-		$deal_payment_plan = $this->myci->post(array('deal_plan_amount','deal_plan_date','deal_plan_currency','deal_plan_paid','deal_plan_ref_number'));
-		$fee_payment_plan = $this->myci->post(array('fee_plan_amount','fee_plan_date','fee_plan_currency','fee_plan_paid','fee_plan_ref_number'));
+		$deal_payment_plan = $this->myci->post(array('deal_plan_amount','deal_plan_date','deal_plan_currency','deal_plan_paid','deal_plan_ref_number','deal_plan_payment_id'));
+		$fee_payment_plan = $this->myci->post(array('fee_plan_amount','fee_plan_date','fee_plan_currency','fee_plan_paid','fee_plan_ref_number','fee_plan_payment_id'));
 
 		$payment_plans=array();
 		$pp_deal=1;
 		$pp_fee=1;
 		for($i=0; $i < count($deal_payment_plan['deal_plan_amount']); $i++){
-			$date=new DateTime($deal_payment_plan['deal_plan_date'][$i].' 00:00:00');
-			$payment_plans[]=array(
-								'amount'	=> $deal_payment_plan['deal_plan_amount'][$i],
-								'date'		=> $date->format('Y-m-d'),
-								'type'		=> 'deal',
-								'deal_id'	=> $deal_id,
-								'currency'	=> $deal_payment_plan['deal_plan_currency'][$i],
-								'ref_number'=> ($pp_deal<10) ? '0'.$pp_deal : $pp_deal,
-								'paid'		=> (!empty($deal_payment_plan['deal_plan_paid'][$i])) ? $deal_payment_plan['deal_plan_paid'][$i] : '0'
-							);
-			$pp_deal++;
-			if(!empty($fee_payment_plan['fee_plan_amount'][$i])){
-				$date=new DateTime($fee_payment_plan['fee_plan_date'][$i].' 00:00:00');
+			if($deal_payment_plan['deal_plan_payment_id'][$i]=='null'){
+				$date=new DateTime($deal_payment_plan['deal_plan_date'][$i].' 00:00:00');
+				$payment_plans_new[]=array(
+									'amount'	=> $deal_payment_plan['deal_plan_amount'][$i],
+									'date'		=> $date->format('Y-m-d'),
+									'type'		=> 'deal',
+									'deal_id'	=> $deal_id,
+									'currency'	=> $deal_payment_plan['deal_plan_currency'][$i],
+									'ref_number'=> ($pp_deal<10) ? '0'.$pp_deal : $pp_deal,
+									'paid'		=> (!empty($deal_payment_plan['deal_plan_paid'][$i])) ? $deal_payment_plan['deal_plan_paid'][$i] : '0'
+								);
+			}else{
+				$date=new DateTime($deal_payment_plan['deal_plan_date'][$i].' 00:00:00');
 				$payment_plans[]=array(
+									'id'		=> $deal_payment_plan['deal_plan_payment_id'][$i],
+									'amount'	=> $deal_payment_plan['deal_plan_amount'][$i],
+									'date'		=> $date->format('Y-m-d'),
+									'currency'	=> $deal_payment_plan['deal_plan_currency'][$i],
+								);
+			}
+			$pp_deal++;
+			
+			if(!empty($fee_payment_plan['fee_plan_amount'][$i])){
+				if($fee_payment_plan['fee_plan_payment_id'][$i]=='null'){
+					$date=new DateTime($fee_payment_plan['fee_plan_date'][$i].' 00:00:00');
+					$payment_plans_new[]=array(
+										'amount'	=> $fee_payment_plan['fee_plan_amount'][$i],
+										'date'		=> $date->format('Y-m-d'),
+										'type'		=> 'fee',
+										'deal_id'	=> $deal_id,
+										'currency'	=> $fee_payment_plan['fee_plan_currency'][$i],
+										'ref_number'=> ($pp_fee<10) ? '0'.$pp_fee : $pp_fee,
+										'paid'		=> (!empty($fee_payment_plan['fee_plan_paid'][$i])) ? $fee_payment_plan['fee_plan_paid'][$i] : '0'
+									);
+				}else{
+					$payment_plans[]=array(
+									'id'		=> $fee_payment_plan['fee_plan_payment_id'][$i],
 									'amount'	=> $fee_payment_plan['fee_plan_amount'][$i],
 									'date'		=> $date->format('Y-m-d'),
-									'type'		=> 'fee',
-									'deal_id'	=> $deal_id,
 									'currency'	=> $fee_payment_plan['fee_plan_currency'][$i],
-									'ref_number'=> ($pp_fee<10) ? '0'.$pp_fee : $pp_fee,
-									'paid'		=> (!empty($fee_payment_plan['fee_plan_paid'][$i])) ? $fee_payment_plan['fee_plan_paid'][$i] : '0'
 								);
+				}
 			}
 			$pp_fee++;
 		}
 		
-		if(!empty($payment_plans)) $this->db->insert_batch('payment_plan',$payment_plans);
+		if(!empty($payment_plans_new)) $this->db->insert_batch('payment_plan',$payment_plans_new);
+		if(!empty($payment_plans)) $this->db->update_batch('payment_plan',$payment_plans,'id');
 	}
 	
 	private function _delete_payment_plans($deal_id){
 		$this->mydb->delete('payment_plan','deal_id',$deal_id);
+	}
+	
+	public function delete_payment_plan(){
+		$this->mydb->delete('payment_plan','id',$_POST['id']);
 	}
 	
 	public function viewdetail($id){
@@ -234,7 +256,6 @@ class Deals extends CI_Controller{
 			return false;
 		
 		return true;
-		//return $row->unpaid;
 	}
 }
 ?>

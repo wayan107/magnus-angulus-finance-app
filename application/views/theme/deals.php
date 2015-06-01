@@ -269,20 +269,21 @@ if($show=='form'){
 			<div class="row">
 				<div class="plan">
 					<div class="col-sm-5">
+						<input type="hidden" name="deal_plan_payment_id[]" value="<?php echo $deal_plan_payment_id; ?>">
 						<?php if(!empty($deal_plan_payment_id)){ ?>
-							<input type="hidden" name="deal_plan_payment_id[]" value="<?php echo $deal_plan_payment_id; ?>">
 							<input type="hidden" name="deal_plan_paid[]" value="<?php echo $deal_plan_paid; ?>">
 							<input type="hidden" name="deal_plan_ref_number[]" value="<?php echo $deal_plan_ref_number; ?>">
 						<?php } ?>
-						<input type="number" name="deal_plan_amount[]" value="<?php echo $deal_plan_amount; ?>" required class="form-control small-common-box">
+						<input type="number" name="deal_plan_amount[]" value="<?php echo (!empty($deal_plan_amount)) ? $deal_plan_amount : ''; ?>" required class="form-control small-common-box">
 					</div>
 					<div class="col-sm-2">
 						<?php
-						echo form_dropdown('deal_plan_currency[]',unserialize(CURRENCY),$deal_plan_currency,'class="form-control small-currency-box" required');
+						$selected = (!empty($deal_plan_currency)) ? $deal_plan_currency : '';
+						echo form_dropdown('deal_plan_currency[]',unserialize(CURRENCY),$selected,'class="form-control small-currency-box" required');
 						?>
 					</div>
 					<div class="col-sm-4">
-						<input type="text" name="deal_plan_date[]" value="<?php echo $deal_plan_date; ?>" required class="datepicker form-control small-common-box">
+						<input type="text" name="deal_plan_date[]" value="<?php echo (!empty($deal_plan_date)) ? $deal_plan_date : ''; ?>" required class="datepicker form-control small-common-box">
 					</div>
 				</div>
 				<?php
@@ -306,7 +307,7 @@ if($show=='form'){
 								<div class="col-sm-4">
 									<input type="text" name="deal_plan_date[]" value="<?php echo $q['date']; ?>" required class="datepicker form-control small-common-box">
 								</div>
-								<div class="col-sm-1"><i class="fa fa-minus-circle remove-plan"></i></div>
+								<div class="col-sm-1"><i class="fa fa-minus-circle remove-plan" rel="<?php echo $q['id']; ?>"></i></div>
 							</div>
 							<?php
 							}
@@ -334,8 +335,8 @@ if($show=='form'){
 			<div class="row">
 				<div class="plan">
 					<div class="col-sm-5">
+						<input type="hidden" name="fee_plan_payment_id[]" value="<?php echo (!empty($fee_plan_payment_id)) ? $fee_plan_payment_id : 'null'; ?>">
 						<?php if(!empty($fee_plan_payment_id)){ ?>
-							<input type="hidden" name="fee_plan_payment_id[]" value="<?php echo $fee_plan_payment_id; ?>">
 							<input type="hidden" name="fee_plan_paid[]" value="<?php echo $fee_plan_paid; ?>">
 							<input type="hidden" name="fee_plan_ref_number[]" value="<?php echo $fee_plan_ref_number; ?>">
 						<?php } ?>
@@ -372,7 +373,7 @@ if($show=='form'){
 									<div class="col-sm-4">
 										<input type="text" name="fee_plan_date[]" value="<?php echo $q['date']; ?>" required class="datepicker form-control small-common-box">
 									</div>
-									<div class="col-sm-1"><i class="fa fa-minus-circle remove-plan"></i></div>
+									<div class="col-sm-1"><i class="fa fa-minus-circle remove-plan" rel="<?php echo $q['id']; ?>"></i></div>
 								</div>
 								<?php
 							}
