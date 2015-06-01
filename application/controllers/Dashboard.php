@@ -39,11 +39,6 @@ class Dashboard extends CI_Controller {
 		return $query->row();
 	}
 	
-	private function _get_number_of_deals(){
-		$query = $this->db->query('SELECT COUNT(id) as total from fn_deals WHERE EXTRACT(MONTH FROM deal_date)="'.date('m').'"');
-		return $query->row();
-	}
-	
 	private function _get_total_amount_deal(){
 		$query = $this->db->query('SELECT FORMAT(SUM(
 									CASE
@@ -63,10 +58,12 @@ class Dashboard extends CI_Controller {
 			$currency = 'payment_currency';
 			$field = 'paid_amount';
 			$where = 'pay_date';
+			$paid_status = 1;
 		}elseif($type=='on'){
 			$currency = 'currency';
 			$field = 'amount';
 			$where = 'date';
+			$paid_status = 0;
 		}
 		
 		$query = $this->db->query('SELECT FORMAT(SUM(
@@ -78,7 +75,7 @@ class Dashboard extends CI_Controller {
 									END
 									),0) as amount
 									from fn_payment_plan
-									WHERE EXTRACT(MONTH FROM '.$where.')="'.date('m').'"');
+									WHERE EXTRACT(MONTH FROM '.$where.')="'.date('m').'" AND paid="'.$paid_status.'"');
 		$row = $query->row();
 		return $row->amount;
 	}

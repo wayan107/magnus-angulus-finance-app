@@ -211,6 +211,7 @@ class Deals extends CI_Controller{
 										'paid'		=> (!empty($fee_payment_plan['fee_plan_paid'][$i])) ? $fee_payment_plan['fee_plan_paid'][$i] : '0'
 									);
 				}else{
+					$date=new DateTime($fee_payment_plan['fee_plan_date'][$i].' 00:00:00');
 					$payment_plans[]=array(
 									'id'		=> $fee_payment_plan['fee_plan_payment_id'][$i],
 									'amount'	=> $fee_payment_plan['fee_plan_amount'][$i],
