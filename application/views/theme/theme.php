@@ -89,7 +89,6 @@
 	<?php }
 		
 		if(!$this->myci->is_home()){
-			echo"kwkwkwkwkw";
 			?>
 			<script>
 				jQuery(document).ready(function(){
