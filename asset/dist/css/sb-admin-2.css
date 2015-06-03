@@ -600,3 +600,10 @@ span.status-complete i {
 span.status-on-going i {
   color: yellow;
 }
+
+#year-period {
+  height: 25px;
+  padding: 0px 5px;
+  cursor: pointer;
+  border-radius: 3px;
+}

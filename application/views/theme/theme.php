@@ -73,12 +73,19 @@
 
     <!-- Metis Menu Plugin JavaScript -->
     <script src="<?php echo base_url(); ?>/asset/bower_components/metisMenu/dist/metisMenu.min.js"></script>
-
-    <!-- Morris Charts JavaScript -->
-    <script src="<?php echo base_url(); ?>/asset/bower_components/raphael/raphael-min.js"></script>
-    <script src="<?php echo base_url(); ?>asset/bower_components/morrisjs/morris.min.js"></script>
-    <!--<script src="<?php echo base_url(); ?>/asset/js/morris-data.js"></script>-->
-
+    
+    <script src="<?php echo base_url(); ?>/asset/dist/js/my-js-small-plugin.js"></script>
+	<?php if($this->myci->is_home()){ ?>
+		<script>
+			var salesData = '<?php echo $datasales; ?>';
+			salesData = JSON.parse(salesData);
+		</script>
+		 <!-- Morris Charts JavaScript -->
+		<script src="<?php echo base_url(); ?>/asset/bower_components/raphael/raphael-min.js"></script>
+		<script src="<?php echo base_url(); ?>asset/bower_components/morrisjs/morris.min.js"></script>
+		<script src="<?php echo base_url(); ?>/asset/js/morris-data.js"></script>
+	<?php } ?>
+	
     <!-- Custom Theme JavaScript -->
     <script src="<?php echo base_url(); ?>/asset/dist/js/sb-admin-2.js"></script>
 	<?php
@@ -105,6 +112,7 @@
 	});
 	</script>
 	<?php } ?>
+	<?php if($this->myci->is_page('deals')) echo 'kwkwkwkw nyak coy'; ?>
 </body>
 
 </html>

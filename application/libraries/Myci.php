@@ -782,4 +782,22 @@ class Myci{
 		$data = explode($to_Currency, $data[1]);
 		return $data[0];//round(floatval($data[0]),2);
 	}
+	
+	function is_page($page_uri){
+		$url=$_SERVER['REQUEST_URI'];
+		preg_match('/'.$page_uri.'/',$url,$match);
+		if(!empty($match))
+			return true;
+		else
+			return false;
+	}
+	
+	function is_home(){
+		$url = "http://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+		$baseurl = base_url();
+		if($url == $baseurl)
+			return true;
+		else
+			return false;
+	}
 }

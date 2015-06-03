@@ -20,6 +20,7 @@ class Dashboard extends CI_Controller {
 			$data['fee'] = $this->_get_total_income();
 			$data['money_in'] = $this->money('in');
 			$data['money_on_going'] = $this->money('on');
+			$data['datasales'] = $this->get_sales_graph_data(true);
 			$this->myci->display_adm('theme/dashboard',$data);
 		}
 	}
@@ -78,5 +79,47 @@ class Dashboard extends CI_Controller {
 									WHERE EXTRACT(MONTH FROM '.$where.')="'.date('m').'" AND paid="'.$paid_status.'"');
 		$row = $query->row();
 		return $row->amount;
+	}
+	
+	function get_sales_graph_data($return=false){
+		if(empty($_POST['year'])){
+			$year = date('Y');
+		}else{
+			$year = $_POST['year'];
+		}
+		$query = $this->db->query('
+					SELECT (CASE EXTRACT(MONTH FROM deal_date)
+								WHEN 1 THEN "Jan"
+								WHEN 2 THEN "Feb"
+								WHEN 3 THEN "Mar"
+								WHEN 4 THEN "Apr"
+								WHEN 5 THEN "May"
+								WHEN 6 THEN "June"
+								WHEN 7 THEN "July"
+								WHEN 8 THEN "Aug"
+								WHEN 9 THEN "Sept"
+								WHEN 10 THEN "Oct"
+								WHEN 11 THEN "Nov"
+								WHEN 12 THEN "Dec"
+							END
+							) as month,
+							SUM(
+							CASE
+								WHEN consult_fee_currency="USD" THEN consult_fee*'.$this->usd_rate.'
+								WHEN consult_fee_currency="EUR" THEN consult_fee*'.$this->eur_rate.'
+								WHEN consult_fee_currency="AUD" THEN consult_fee*'.$this->aud_rate.'
+								ELSE consult_fee
+							END
+							) as income, COUNT(id) as sales
+						FROM fn_deals
+						WHERE EXTRACT(YEAR FROM deal_date) = "'.$year.'"
+						GROUP BY month
+						ORDER BY EXTRACT(MONTH FROM deal_date)
+				');
+		
+		if($return)
+			return json_encode($query->result_array());
+		else
+			echo json_encode($query->result_array());
 	}
 }

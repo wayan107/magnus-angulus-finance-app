@@ -307,5 +307,4 @@ jQuery(document).ready(function(){
 			});
 		});
 	}
-	
 });
