@@ -75,6 +75,8 @@
     <script src="<?php echo base_url(); ?>/asset/bower_components/metisMenu/dist/metisMenu.min.js"></script>
     
     <script src="<?php echo base_url(); ?>/asset/dist/js/my-js-small-plugin.js"></script>
+	<script src="<?php echo base_url(); ?>/asset/dist/js/sb-admin-2.js"></script>
+	
 	<?php if($this->myci->is_home()){ ?>
 		<script>
 			var salesData = '<?php echo $datasales; ?>';
@@ -84,10 +86,22 @@
 		<script src="<?php echo base_url(); ?>/asset/bower_components/raphael/raphael-min.js"></script>
 		<script src="<?php echo base_url(); ?>asset/bower_components/morrisjs/morris.min.js"></script>
 		<script src="<?php echo base_url(); ?>/asset/js/morris-data.js"></script>
-	<?php } ?>
+	<?php }
+		
+		if(!$this->myci->is_home()){
+			echo"kwkwkwkwkw";
+			?>
+			<script>
+				jQuery(document).ready(function(){
+					jQuery('#dashboard').removeClass('active');
+				});
+			</script>
+			<?php
+		}
+	?>
 	
     <!-- Custom Theme JavaScript -->
-    <script src="<?php echo base_url(); ?>/asset/dist/js/sb-admin-2.js"></script>
+    
 	<?php
 	$url=$_SERVER['REQUEST_URI'];
 	preg_match('/deals\/add/',$url,$deal_add);
@@ -112,7 +126,6 @@
 	});
 	</script>
 	<?php } ?>
-	<?php if($this->myci->is_page('deals')) echo 'kwkwkwkw nyak coy'; ?>
 </body>
 
 </html>

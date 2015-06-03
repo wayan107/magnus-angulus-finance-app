@@ -100,10 +100,6 @@ body {
     border-bottom: 1px solid #e7e7e7;
 }
 
-.sidebar ul li a.active {
-    background-color: #eee;
-}
-
 .sidebar .arrow {
     float: right;
 }
@@ -606,4 +602,45 @@ span.status-on-going i {
   padding: 0px 5px;
   cursor: pointer;
   border-radius: 3px;
+}
+
+#side-menu li a{
+color: #111;
+}
+
+#side-menu li a.active {
+    background-color: #ADCD16;
+	color:#fff;
+}
+
+.nav>li>a:focus, .nav>li>a:hover {
+  text-decoration: none;
+  background-color: #ADCD16;
+  color: #fff;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #86a203;
+  border-color: #799106;
+}
+
+.btn-primary:hover{
+  background-color: #ADCD16;
+  border-color: #ADCD16;
+}
+
+a:hover {
+  color: #86a203;
+  text-decoration: none;
+}
+
+a {
+  color: #86a203;
+  text-decoration: none;
+}
+
+.navbar-default .navbar-brand {
+  color: #000;
+  font-size: 22px;
 }
