@@ -269,7 +269,7 @@ if($show=='form'){
 			<div class="row">
 				<div class="plan">
 					<div class="col-sm-5">
-						<input type="hidden" name="deal_plan_payment_id[]" value="<?php echo $deal_plan_payment_id; ?>">
+						<input type="hidden" name="deal_plan_payment_id[]" value="<?php echo (!empty($deal_plan_payment_id)) ? $deal_plan_payment_id : 'null'; ?>">
 						<?php if(!empty($deal_plan_payment_id)){ ?>
 							<input type="hidden" name="deal_plan_paid[]" value="<?php echo $deal_plan_paid; ?>">
 							<input type="hidden" name="deal_plan_ref_number[]" value="<?php echo $deal_plan_ref_number; ?>">
