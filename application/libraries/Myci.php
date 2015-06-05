@@ -478,7 +478,12 @@ class Myci{
 				$item_row[0]=$table_row; 
 				$table_row++;
 				for($i=0;$i<$jumField;$i++){
-					$item_row[$i+1]=$dts[$fields[$i]];
+					if($fields[$i]=='contract_number'){
+						$item_row[$i+1]=anchor('deals/viewdetail/'.$dts['id'],$dts[$fields[$i]],array('class'=>'button-view pop-up','title'=>'see deal details'));
+					}else{
+						$item_row[$i+1]=$dts[$fields[$i]];
+					}
+					
 				}
 				
 				$button_class=($dts[$value]==0) ? 'activate' : 'deactivate';
