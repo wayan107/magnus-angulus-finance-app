@@ -157,7 +157,7 @@
 				$headers .= 'From: Magnus Angulus App <no-reply@villasofbali.com>' . "\r\n";
 				
 				$msg = '<p>Click link below to reset your password</p>';
-				$msg = '<a href="'.base_url().'/changepassword/'.$q['id'].'/'.$token.'"';
+				$msg = '<a href="'.base_url().'/changepassword/'.$q['id'].'/'.$token.'">Reset Password</a>';
 				// Mail it
 				mail($to, $subject, $msg, $headers);
 				return true;
