@@ -21,7 +21,6 @@
 	  margin-left: -235px;
 	  padding: 25px;
 	  width: 420px;
-	  height: 340px;
 	  background: white;
 	  text-align: center;
 	}
@@ -71,28 +70,33 @@
 	
 	.left{float:left}
 	.right{float:right;text-align:right;}
+	
+	.error{color:red;}
 </style>
 </head>
 
 <body>
-<form action="<?php echo base_url(); ?>auth/login/" method="POST">
+<form action="<?php echo base_url(); ?>users/resetpassword/" method="POST">
 <div class="login">
 	<div class="top">
-		<h1>Login</h1>
+		<h1>Reset Password</h1>
 	</div>
 	<div class="mid">
-		<input type="text" placeholder="Username" required name="username">
-		<input type="password" placeholder="Password" required name="password">
-		<p><a href="<?php echo base_url() ?>users/resetpassword/">Forget your password?</a></p>
+		<?php if($send){ 
+			echo '<p>'.$msg.'</p>';
+		}else{ ?>
+			<input type="text" placeholder="Username" required name="username">
+		<?php
+			echo '<p class="error">'.$error.'</p>';
+		} ?>
 	</div>
+	<?php if(!$send){ ?>
 	<div class="bot">
-		<div class="section left">
-			<input type="checkbox" id="remember" name="remember-me"> <label for="remember">Remember me?</label>
-		</div>
 		<div class="section right">
-			<input type="submit" name="login" class="login-button" value="Login">
+			<input type="submit" name="send" class="login-button" value="Reset Password">
 		</div>
 	</div>
+	<?php } ?>
 </div>
 </form>
 </body>

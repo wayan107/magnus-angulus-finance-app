@@ -70,6 +70,10 @@ class Myci{
 		$this->ci->load->view('login');
 		return false;
 	}
+	
+	function get_user_logged_in(){
+		return $this->ci->input->cookie($this->session);
+	}
 	//Authentication end ---------------------------------->
 	
 	
