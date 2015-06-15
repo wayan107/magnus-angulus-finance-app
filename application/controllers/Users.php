@@ -129,7 +129,7 @@
 				
 				if($userfound){
 					$data['send'] = true;
-					$data['msg'] = 'We sent an email verification to you. Please check and follow the instruction that you see on the email.';
+					$data['msg'] = 'We sent an email verification to you, it\'s only valid for 24 hours. Please check and follow the instruction that you see on the email.';
 				}else{
 					$data['error'] = 'Username not found!';
 				}
@@ -157,7 +157,7 @@
 				$headers .= 'From: Magnus Angulus App <no-reply@villasofbali.com>' . "\r\n";
 				
 				$msg = '<p>Click link below to reset your password</p>';
-				$msg = '<a href="'.base_url().'/changepassword/'.$q['id'].'/'.$token.'">Reset Password</a>';
+				$msg = '<a href="'.base_url().'changepassword/'.$q['id'].'/'.$token.'">Reset Password</a>';
 				// Mail it
 				mail($to, $subject, $msg, $headers);
 				return true;
@@ -167,7 +167,27 @@
 		}
 		
 		public function changepassword($uid,$token){
-			$this->load->view('changepassword');
+			$q = $this->db->query('SELECT username from fn_users where id="'.$uid.'"');
+			$q = $q->row();
+			$verify_token = md5($q->username . date('Y-m-d H'));
+			
+			$data = array(
+					'uid'	=> $uid,
+					'error'	=> ''
+				);
+				$data['user'] = $q->username;
+				$data['token'] = $verify_token;
+			if($token != $verify_token){
+				$data['error'] = 'Your request is expired, please do another reset password request.';
+			}
+			$this->load->view('changepassword',$data);
+		}
+		
+		public function do_changepassword(){
+			$pass = $this->input->post('password');
+			$c_pass = $this->input->post('c_password');
+			
+			
 		}
 	}
 ?>
