@@ -10,6 +10,7 @@
 			
 		public function __construct(){
 			parent::__construct();
+			$this->load->model('dealsmodel');
 		}
 		
 		public function index($offset=0){
@@ -23,6 +24,19 @@
 			$where ='where 1=1';
 			$listing_paid='';
 			$sales_paid='';
+			$sales_manager_paid='';
+			
+			$sales_manager = '';
+			$listing = '';
+			$sales = '';
+			
+			//limit the sales agent view
+			if($this->myci->user_role=='sales'){
+				$q = $this->db->query('SELECT relatedaccount from fn_users where username="'.$this->myci->get_user_logged_in().'"');
+				$q = $q->row();
+				$where .= ' and ag.id="'.$q->relatedaccount.'"';
+			}
+			
 			if(!empty($_POST['find'])){
 				if(!empty($_POST['date-start']) && !empty($_POST['date-end'])){
 					$date_start=new DateTime($_POST['date-start'].' 00:00:00');
@@ -36,51 +50,136 @@
 				if($_POST['paid']!=''){
 					$listing_paid = ' and listing_commission_paid="'.$_POST['paid'].'"';
 					$sales_paid = ' and sales_commission_paid="'.$_POST['paid'].'"';
+					$sales_manager_paid = ' and sales_manager_commission_paid="'.$_POST['paid'].'"';
+				}
+				
+				if($this->myci->user_role!='sales'){
+					if($_POST['sales']!=''){
+						$sales = ' and ag.id="'.$_POST['sales'].'"';
+						if(!$this->myci->is_sales_manager($_POST['sales'])){
+							$sales_manager = ' and ag.id="0"';
+						}
+					}
+					
+					if($_POST['listing']!=''){
+						$listing = ' and ag.id="'.$_POST['listing'].'"';
+					}
+					
 				}
 			}
 			
-			$sales_field='d.deal_date,d.villa_code,contract_number,ag.name as agent,d.sales_commission_paid as comm_paid,ag.id as agent_id,"sales" as type,ac.id as comm_paid_id, CONCAT(consult_fee_currency," ",CAST(FORMAT((consult_fee*ag.commission/100),0) as CHAR)) as comm_amount';
-			$sales_sql=' from fn_deals d
-					inner join fn_agent ag on (ag.id=d.sales_agent)
-					left join fn_agent_commission ac on (ac.agent=d.sales_agent and ac.deal_id=d.id)
-					'.$where.$sales_paid.'
-					group by d.id';
-					
-			$listing_field='d.deal_date,d.villa_code,contract_number,ag.name as agent,d.listing_commission_paid as comm_paid,ag.id as agent_id,"listing" as type,ac.id as comm_paid_id,
-							(case when d.deal_price<99999999 then "IDR 500,000"
-									when d.deal_price<149999999 then "IDR 750,000"
-									when d.deal_price<299999999 then "IDR 1,000,000"
-									when d.deal_price<499999999 then "IDR 1,500,000"
-									when d.deal_price<749999999 then "IDR 2,000,000"
-									when d.deal_price<999999999 then "IDR 2,500,000"
-									when d.deal_price<1999999999 then "IDR 3,000,000"
-									when d.deal_price<2999999999 then "IDR 4,000,000"
-									when d.deal_price<3999999999 then "IDR 5,000,000"
-									when d.deal_price<4999999999 then "IDR 6,000,000"
-									else 7000000 end) as comm_amount';
-			$listing_sql='	from fn_deals d
-					inner join fn_agent ag on (ag.id=d.listing_agent)
-					left join fn_agent_commission ac on (ac.agent=d.listing_agent and ac.deal_id=d.id)
-					'.$where.$listing_paid.'
-					group by d.id';
+			$usd_rate = $this->myci->get_currency_rate('USD','IDR',1);
+			$eur_rate = $this->myci->get_currency_rate('EUR','IDR',1);
+			$aud_rate = $this->myci->get_currency_rate('AUD','IDR',1);
 			
-			$query=$this->db->query('select * from (select d.id,'.$sales_field.$sales_sql.'
-									union all
-									select d.id,'.$listing_field.$listing_sql.') t
-									order by t.id DESC
-									limit '.$offset.' , '.$this->limit);
+			$fields = 'd.deal_date,d.villa_code,contract_number,ag.name as agent,
+						ac.paid as comm_paid, ag.id as agent_id,
+						ag.occupation as type,ac.id as comm_paid_id,
+						(CASE
+							WHEN ac.commission_type="sales agent commission" THEN
+								CONCAT(consult_fee_currency," ",CAST(FORMAT((consult_fee*ag.commission/100),0) as CHAR))
+							
+							WHEN ac.commission_type="listing agent commission" THEN
+								case when 
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<99999999 then "IDR 500,000"
+										
+									when
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<149999999 then "IDR 750,000"
+											
+									when
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<299999999 then "IDR 1,000,000"
+											
+									when
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<499999999 then "IDR 1,500,000"
+											
+									when
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<749999999 then "IDR 2,000,000"
+											
+									when
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<999999999 then "IDR 2,500,000"
+											
+									when
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<1999999999 then "IDR 3,000,000"
+											
+									when
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<2999999999 then "IDR 4,000,000"
+											
+									when
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<3999999999 then "IDR 5,000,000"
+											
+									when
+										(case
+											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+											else d.deal_price_currency
+										end)<4999999999 then "IDR 6,000,000"
+											
+									else "IDR 7.000.000" end
+							
+							WHEN ac.commission_type="sales manager commission" THEN
+								CONCAT(consult_fee_currency," ",CAST(FORMAT((consult_fee*5/100),0) as CHAR))
+						END) as comm_amount
+						';
 
-			$query_paging=$this->db->query('select count(id) as num
-									from (select d.id,'.$sales_field.$sales_sql.'
-									union all
-									select d.id,'.$listing_field.$listing_sql.') t');
-									
-			$query_paging=$query_paging->row();
-			$total_page=$query_paging->num;
+			$query = $this->db->query('SELECT d.id,ac.id as ac_id,
+							'.$fields.'
+							from fn_agent_commission ac
+							inner join fn_deals d on ac.deal_id=d.id
+							inner join fn_agent ag on ag.id=ac.agent
+						');
+			//$query_paging=$query_paging->row();
+			$total_page=10;//$query_paging->num;
 			$table_header='Deal Date,Villa Code,Contract Number,Agent,Commission';
 			$field='deal_date,villa_code,contract_number,agent,comm_amount';
 			$data['page']=$this->myci->page2($total_page,$this->limit,$this->controller,3);
 			$data['tabel']=$this->myci->table_active2($query,$field,$table_header,$this->controller,$this->primary,'comm_paid','Payment Status');
+
 			$this->myci->display_adm('theme/'.$this->view,$data);
 		}
 		
@@ -111,7 +210,6 @@
 		}
 		
 		public function opensetform(){
-			//$rel=explode('-',$_POST['rel']);
 			$this->load->view('theme/agentcommission-set-paid',array('rel'=>$_POST['rel'],'data_type'=>$_POST['data-type']));
 		}
 		
@@ -126,29 +224,20 @@
 			$data['currency']=$this->input->post('currency');
 			$data['pay_date']=$date->format('Y-m-d');
 			$data['payment_via']=$this->input->post('payment_via');
-			$data['agent']=$rel[1];
-			$data['deal_id']=$rel[0];
+			$data['paid']=1;
 			
-			if($_POST['data_type']=='sales'){
-				$update_data['sales_commission_paid']=1;
-			}elseif($_POST['data_type']=='listing'){
-				$update_data['listing_commission_paid']=1;
-			}
-			
-			$this->db->insert('agent_commission',$data);
-			$this->_update_commision_paid_status($update_data,$rel[0]);
+			$this->_set_commision_payment_status($rel[0],$data);
 		}
 		
 		public function deactivate(){
 			$rel=explode('-',$_POST['rel']);
-			$this->db->delete('agent_commission',array('deal_id'=>$rel[0],'agent'=>$rel[1]));
+			$data['amount_paid']=0;
+			$data['currency']='';
+			$data['pay_date']='';
+			$data['payment_via']='';
+			$data['paid']=0;
 			
-			if($_POST['data_type']=='sales'){
-				$update_data['sales_commission_paid']=0;
-			}elseif($_POST['data_type']=='listing'){
-				$update_data['listing_commission_paid']=0;
-			}
-			$this->_update_commision_paid_status($update_data,$rel[0]);
+			$this->_set_commision_payment_status($rel[0],$data);
 		}
 		
 		public function viewdetail($id){
@@ -156,10 +245,14 @@
 									CONCAT (ac.currency," ",CAST(FORMAT(ac.amount_paid,0) AS CHAR)) as amount_paid,
 									CONCAT(d.consult_fee_currency," ",CAST(FORMAT(d.consult_fee,0) as CHAR)) as fee_amount, CONCAT(d.deal_price_currency," ",CAST(FORMAT(d.deal_price,0) as CHAR)) as deal_amount
 									from fn_agent_commission ac
-									inner join fn_deals d on d.id=ac.deal_id
+									left join fn_deals d on d.id=ac.deal_id
 									where ac.id="'.$id.'"');
 			$data['row']=$query->row();
 			$this->load->view('theme/agentcommission-paid-details',$data);
+		}
+		
+		private function _set_commision_payment_status($ac_id,$data){
+			$this->db->update('fn_agent_commission',$data,array('id'=>$ac_id));
 		}
 	}
 ?>

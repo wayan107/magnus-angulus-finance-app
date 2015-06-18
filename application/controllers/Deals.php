@@ -60,7 +60,12 @@ class Deals extends CI_Controller{
 		
 		$deal_id = $this->mydb->insert($this->tabel,$data);
 		$this->_save_payment_plans($deal_id);
+		
+		$comm_data = array();
+		$this->_set_commission_data($comm_data,$deal_id);
 
+		$this->_save_agent_commission($comm_data,true);
+		
 		echo"<script>alert('Data Saved Successfully'); window.location='".base_url().$this->redirect."'</script>";
 	}
 	
@@ -123,17 +128,24 @@ class Deals extends CI_Controller{
 		
 		$this->mydb->update($this->tabel,$data,$this->primary,$id);
 		$this->_save_payment_plans($id);
+		
+		$comm_data = array();
+		$this->_set_commission_data($comm_data,$id);
+		$this->_update_agent_commission($comm_data);
+		
 		echo"<script>alert('Data Updated Successfully'); window.location='".base_url().$this->redirect."'</script>";
 	}
 	
 	public function delete($id){
 		$this->mydb->delete($this->tabel,$this->primary,$id);
 		$this->_delete_payment_plans($id);
+		$this->_delete_agent_commissions($id);
 		redirect($this->redirect);
 	}
 	
 	public function _view($offset=0){
-		$data['add']=anchor($this->controller.'/add','Add New',array('class'=>'btn btn-primary'));
+		$data['add']=($this->myci->user_role=='admin') ? anchor($this->controller.'/add','Add New',array('class'=>'btn btn-primary')) : '';
+		$data['filter_class'] = ($this->myci->user_role=='admin') ? 'pull-right' : '';
 		$field='deal_date,villa_code,contract_number,CONCAT(deal_price_currency," ",CAST(FORMAT(deal_price,0) as CHAR)) as deal_amount';
 		$data['_page_title'] = $this->page_name;
 		$where='where 1=1';
@@ -241,7 +253,7 @@ class Deals extends CI_Controller{
 											left join fn_client c on c.id=d.client
 											left join fn_owner o on o.id=d.owner
 											left join fn_area a on a.id=d.area
-											left join fn_agent s on (s.id=d.sales_agent and s.occupation="Sales Agent")
+											left join fn_agent s on (s.id=d.sales_agent and (s.occupation="Sales Agent" or s.occupation="Sales manager"))
 											left join fn_agent l on (l.id=d.listing_agent and l.occupation="Listing Agent")
 											where d.id="'.$id.'"');
 		$data['deal_payment_plan']=$this->db->query('select * from fn_payment_plan where deal_id="'.$id.'" and type="deal"');
@@ -257,6 +269,59 @@ class Deals extends CI_Controller{
 			return false;
 		
 		return true;
+	}
+	
+	private function _set_commission_data(&$comm_data,&$deal_id){
+		$comm_data = array(
+				array(
+					'deal_id'	=> $deal_id,
+					'agent'		=> $_POST['sales_agent'],
+					'commission_type'	=> 'sales agent commission'
+				)
+			);
+		
+		if(!empty($_POST['listing_agent'])){
+			$comm_data[]=array(
+					'deal_id'	=> $deal_id,
+					'agent'		=> $_POST['listing_agent'],
+					'commission_type'	=> 'listing agent commission'
+				);
+		}
+		
+		if(!$this->myci->is_sales_manager($_POST['sales_agent'])){
+			$sales_manager = $this->myci->get_the_sales_manager();
+			if($sales_manager){
+				$comm_data[]=array(
+						'deal_id'	=> $deal_id,
+						'agent'		=> $sales_manager,
+						'commission_type'	=> 'sales manager commission'
+					);
+			}
+		}
+	}
+	
+	private function _save_agent_commission($data,$batch=false){
+		if($batch){
+			$this->db->insert_batch('fn_agent_commission',$data);
+		}else{
+			$this->db->insert('fn_agent_commission',$data);
+		}
+	}
+	
+	private function _update_agent_commission($datas){
+		foreach($datas as $data){
+			$q = $this->db->query('SELECT id from fn_agent_commission where deal_id="'.$data['deal_id'].'" and commission_type="'.$data['commission_type'].'"');
+			if($q->num_rows()>0){
+				$q = $q->row();
+				$this->db->update('fn_agent_commission',$data,array('id'=>$q->id));
+			}else{
+				$this->_save_agent_commission($data);
+			}
+		}
+	}
+	
+	private function _delete_agent_commissions($deal_id){
+		$this->db->delete('fn_agent_commission',array('deal_id'=>$deal_id));
 	}
 }
 ?>

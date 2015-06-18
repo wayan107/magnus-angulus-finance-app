@@ -6,6 +6,18 @@
 				Until : <input type="text" name="date-end" class="datepicker" value="<?php echo (!empty($_POST['date-end'])) ? $_POST['date-end'] : ''; ?>">
 				<?php echo form_dropdown('paid',array(''=>'All','0'=>'Unpaid','1'=>'Paid')); ?>
 				
+				
+				<?php
+				if($this->myci->user_role!='sales'){
+					$sales = $this->dealsmodel->get_agent_dropdown('Sales Agent','All Sales Agent');
+					$sales[0]='Hide';
+					echo form_dropdown('sales',$sales);
+
+					$listing = $this->dealsmodel->get_agent_dropdown('Listing Agent','All Listing Agent');
+					$listing[0]='Hide';
+					echo form_dropdown('listing',$listing);
+				}
+				?>
 				<input type="submit" class="btn btn btn-primary" name="find" value="Find">
 			</form>
 		</div>

@@ -3,12 +3,14 @@
 class Myci{
 	var $ci;
 	private $session, $auth_page, $dashboard;
+	public $user_role;
 	
 	function __construct(){
 		$this->ci=& get_instance();
 		$this->session = 'logged_in_user'; //store logged in user data
 		$this->auth_page = 'auth'; //authentication controller
-		$this->dashboard = 'dashboard'; //default page if user is logged in
+		$this->dashboard = '/'; //default page if user is logged in
+		$this->user_role = $this->get_user_role();
 	}
 	
 	//Authentication begin <-------------------------------
@@ -73,6 +75,17 @@ class Myci{
 	
 	function get_user_logged_in(){
 		return $this->ci->input->cookie($this->session);
+	}
+	
+	function get_user_role(){
+		$user = $this->ci->input->cookie($this->session);
+		$q = $this->ci->db->query('SELECT role from fn_users where username="'.$user.'"');
+		if($q->num_rows()>0){
+			$q = $q->row();
+			return $q->role;
+		}
+		
+		return false;
 	}
 	//Authentication end ---------------------------------->
 	
@@ -340,12 +353,14 @@ class Myci{
 					$item_row[$i+1]=$dts[$fields[$i]];
 					
 				}
-				
-				$buttons=array(
-					anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit')),
-					anchor($controller.'/delete/'.$dts[$primary],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')"))
-				);
-				
+				if($this->user_role=='admin' || ($this->user_role=='superadmin' && $controller=='users')){
+					$buttons=array(
+						anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit')),
+						anchor($controller.'/delete/'.$dts[$primary],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')"))
+					);
+				}else{
+					$buttons=array();
+				}
 				if($see_details) array_unshift($buttons,anchor($controller.'/viewdetail/'.$dts[$primary],'<i class="fa fa-search-plus"></i>',array('class'=>'button-view pop-up')));
 				
 				//$cel=array('data'=>anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit'))." ".anchor($controller.'/delete/'.$dts[$primary],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')")), 'class'=>'aksi');
@@ -415,8 +430,9 @@ class Myci{
 				$button_class=($dts[$value]==0) ? 'activate' : 'deactivate';
 				$button_title=($dts[$value]==0) ? 'Unpaid' : 'Paid';
 				
+				$button_toogle = ($this->user_role=='admin') ? anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts[$primary])) : '<span class="circle-button '.$button_class.'" title="'.$button_title.'"></span>';
 				$buttons=array(
-					anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts[$primary])),
+					$button_toogle,
 					anchor($controller.'/generateinvoice/'.$dts[$primary],'<i class="fa fa-file-pdf-o"></i>',array('title'=>'Export to PDF','target'=>'_blank'))
 				);
 				if($dts[$value]==1) array_push($buttons,anchor($controller.'/viewdetail/'.$dts[$primary],'<i class="fa fa-search-plus"></i>',array('class'=>'button-view pop-up','title'=>'see payment details')));
@@ -487,14 +503,15 @@ class Myci{
 					}else{
 						$item_row[$i+1]=$dts[$fields[$i]];
 					}
-					
 				}
 				
 				$button_class=($dts[$value]==0) ? 'activate' : 'deactivate';
 				$button_title=($dts[$value]==0) ? 'Unpaid' : 'Paid';
-				//$rel=($dts[$value]==0) ? $dts[$primary].'-'.$dts['agent_id'] : $dts['comm_paid_id'];
+				$button_toogle = ($this->user_role=='admin') ? anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts['ac_id'].'-'.$dts['agent_id'],'data-type'=>$dts['type'])) : '<span class="circle-button '.$button_class.'" title="'.$button_title.'"></span>';
+				
 				$buttons=array(
-					anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts[$primary].'-'.$dts['agent_id'],'data-type'=>$dts['type']))
+					$button_toogle
+					//anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts[$primary].'-'.$dts['agent_id'],'data-type'=>$dts['type']))
 				);
 				if($dts[$value]==1) array_push($buttons,anchor($controller.'/viewdetail/'.$dts['comm_paid_id'],'<i class="fa fa-search-plus"></i>',array('class'=>'button-view pop-up','title'=>'see payment details')));
 				
@@ -659,7 +676,11 @@ class Myci{
 		$data['_content']=$this->ci->load->view($template,$data, true);
 		//$data['_header']=$this->_ci->load->view('template/header',$data, true);
   		//$data['_top_menu']=$this->_ci->load->view('template/menu',$data, true);
-		$data['_menu']=$this->ci->load->view('theme/menu',null, true);
+		
+		$menu_data['userrole'] = $this->user_role;
+		$menu_data['user_display_name'] = $this->ci->input->cookie($this->session.'_name');
+		
+		$data['_menu']=$this->ci->load->view('theme/menu',$menu_data, true);
 		$this->ci->load->view('theme/theme.php',$data);
 	} 
 	//Template display end ------------------>
@@ -808,5 +829,24 @@ class Myci{
 			return true;
 		else
 			return false;
+	}
+	
+	function is_sales_manager($agent_id){
+		$q = $this->ci->db->query('SELECT id from fn_agent where LOWER(occupation)="sales manager" and id="'.$agent_id.'"');
+		if($q->num_rows()>0){
+			return true;
+		}
+		
+		return false;
+	}
+	
+	function get_the_sales_manager(){
+		$q = $this->ci->db->query('SELECT id from fn_agent where LOWER(occupation)="sales manager"');
+		if($q->num_rows()>0){
+			$q = $q->row();
+			return $q->id;
+		}
+		
+		return false;
 	}
 }

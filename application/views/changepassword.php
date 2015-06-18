@@ -71,21 +71,21 @@
 	
 	.left{float:left}
 	.right{float:right;text-align:right;}
-	.error{color:red;}
+	.error{color:red;display:none;}
 </style>
 </head>
 
 <body>
-<form action="<?php echo base_url(); ?>users/do_changepassword/" method="POST">
+<form id="formp" action="<?php echo base_url(); ?>users/do_changepassword/" method="POST">
 <div class="login">
 	<div class="top">
 		<h1>Change Password</h1>
 	</div>
 	<div class="mid">
-		<?php echo $token; if(empty($error)){ ?>
+		<?php if(empty($error)){ ?>
 		<input type="hidden" name="uid" value="<?php echo $uid; ?>">
-		<input type="password" placeholder="Password" required name="password">
-		<input type="password" placeholder="Confirm Password" required name="c_password">
+		<input type="password" id="d1" placeholder="New Password" required name="password">
+		<input type="password" id="d2" placeholder="Confirm New Password" required name="c_password">
 		<p class="error">Password is different</p>
 		<?php }else{
 			echo "<p class='error'>$error</p>";
@@ -114,8 +114,20 @@
 			}
 		}
 		
-		jQuery('#d1').onBlur(function(){checkpass();});
-		jQuery('#d2').onBlur(function(){checkpass()});
+		jQuery('#d1').keyup(function(){checkpass();});
+		jQuery('#d2').keyup(function(){checkpass();});
+		
+		jQuery('#formp').submit(function(e){
+			if(jQuery('#d1').val()=='' || jQuery('#d2').val()==''){
+				alert('Please type your new password and confirm new password completely.');
+				e.preventDefault();
+			}else{
+				if(jQuery('#d1').val() != jQuery('#d2').val()){
+					jQuery('.error').slideDown();
+					e.preventDefault();
+				}
+			}
+		});
 	});
 </script>
 </body>

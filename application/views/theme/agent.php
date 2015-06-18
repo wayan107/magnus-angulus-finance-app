@@ -35,7 +35,8 @@ if($show=='form'){
 		$options=array(
 				''					=> 'Choose',
 				'Listing Agent'		=> 'Listing Agent',
-				'Sales Agent'		=> 'Sales Agent'
+				'Sales Agent'		=> 'Sales Agent',
+				'Sales manager'		=> 'Sales Manager'
 			);
 		echo form_dropdown('occupation',$options,$occupation,'id="occupation" class="form-control" required');
 		

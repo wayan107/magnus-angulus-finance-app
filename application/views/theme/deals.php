@@ -246,7 +246,7 @@ if($show=='form'){
 					<label>Listing Agent</label>
 						<?php
 							$options=$this->dealsmodel->get_agent_dropdown('Listing Agent');
-							echo form_dropdown('listing_agent',$options,$listing_agent,'class="form-control" required');
+							echo form_dropdown('listing_agent',$options,$listing_agent,'class="form-control"');
 						?>
 					</div>
 				</div>
@@ -407,7 +407,7 @@ if($show=='form'){
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<?php echo $add; ?>
-			<div class="pull-right filter">
+			<div class="<?php echo $filter_class; ?> filter">
 				<form method="post">
 				Filter:
 				<input type="text" class="datepicker" name="date-start" value="<?php if (!empty($_POST['date-start'])) echo $_POST['date-start'];; ?>">

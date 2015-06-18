@@ -259,7 +259,7 @@ jQuery(document).ready(function(){
 			jQuery.ajax({
 				type	: 'POST',
 				url		: baseurl+'agentcommission/opensetform/',
-				data	: {'rel':jQuery(this).attr('rel'),'data-type':jQuery(this).attr('data-type')},
+				data	: {'rel':jQuery(this).attr('rel')},
 				success	: function(e){
 					jQuery('body').append(e);
 					jQuery( ".datepicker" ).datepicker();
@@ -273,7 +273,7 @@ jQuery(document).ready(function(){
 				jQuery.ajax({
 					type	: 'POST',
 					url		: baseurl+'agentcommission/deactivate/',
-					data	: {'rel':jQuery(this).attr('rel'),'data_type':jQuery(this).attr('data-type')},
+					data	: {'rel':jQuery(this).attr('rel')},
 					success	: function(e){
 						obj.removeClass('fa fa-circle-o-notch fa-spin').addClass('activate');
 						obj.attr('title','Unpaid');
@@ -300,11 +300,19 @@ jQuery(document).ready(function(){
 			jQuery.ajax({
 				type	: 'POST',
 				url		: baseurl+'agentcommission/activate/',
-				data	:{'id':jQuery(this).attr('rel'),'paid_amount':jQuery('#paid_amount').val(),'currency':jQuery('#currency').val(),'pay_date':jQuery('#pay_date').val(),'payment_via':jQuery('#payment_via').val(),'data_type':jQuery(this).attr('data-type')},
+				data	:{'id':jQuery(this).attr('rel'),'paid_amount':jQuery('#paid_amount').val(),'currency':jQuery('#currency').val(),'pay_date':jQuery('#pay_date').val(),'payment_via':jQuery('#payment_via').val()},
 				success	: function(){
 					location.reload();
 				}
 			});
 		});
 	}
+	
+	jQuery('#role').change(function(){
+		if(jQuery(this).val()=='sales' || jQuery(this).val()=='sales_manager'){
+			jQuery('#ra').removeAttr('disabled').attr('required','required');
+		}else{
+			jQuery('#ra').removeAttr('required').attr('disabled','disabled');
+		}
+	});
 });

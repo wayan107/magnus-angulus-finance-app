@@ -86,3 +86,9 @@ define('EXIT__AUTO_MIN', 9); // lowest automatically-assigned error code
 define('EXIT__AUTO_MAX', 125); // highest automatically-assigned error code
 
 define('CURRENCY',serialize(array(''=>'Choose','IDR'=>'IDR','USD'=>'USD','EUR'=>'EUR','AUD'=>'AUD')));
+
+//ACL data
+define('MASTERDATA',serialize(array('superadmin','admin')));
+define('FINDTHEMONEY',serialize(array('superadmin','admin')));
+define('USERS',serialize(array('superadmin')));
+define('REPORTS',serialize(array('superadmin','admin','sales_manager','sales')));

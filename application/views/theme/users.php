@@ -53,11 +53,22 @@ if($show=='form'){
 		echo"</td></tr><tr><td>Role </td><td>";
 		$opts=array(
 					'viewer'		=> 'Viewer',
+					'sales'			=> 'Sales Agent',
+					'sales_manager'	=> 'Sales manager',
 					'admin'			=> 'Admin',
-					'superadmin'	=> 'Super Admin'
+					'superadmin'	=> 'Super Admin',
 				);
-		echo form_dropdown('role',$opts,$role,'class="form-control"');
-				
+		echo form_dropdown('role',$opts,$role,'class="form-control" id="role"');
+		
+		echo"</td></tr><tr><td>Related Account </td><td>";
+		$disable='disabled';
+		$required='';
+		if($role=='sales' || $role=='sales_manager'){
+			$disable='';
+			$required='required';
+		}
+		echo form_dropdown('relatedaccount',$ra,$relatedaccount,'class="form-control" id="ra" '.$disable.' '.$required);
+		
 		echo"</td></tr><tr><td colspan=2 align=center>";
 		echo form_submit('submit',$tombol,'class="btn btn-primary"');
 		echo"</td ></tr></table>";

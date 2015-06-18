@@ -7,7 +7,7 @@
 		private $primary='id';
 		private $controller='users';
 		private $view='theme/users';
-		private $textbox=array('id','username','password','display_name','email','role');
+		private $textbox=array('id','username','password','display_name','email','role','relatedaccount');
 
 		public function __construct(){
 			parent::__construct();
@@ -28,6 +28,7 @@
 			$data['tombol']='Save';
 			$data['_page_title'] = 'Add New User';
 			$data['action']=$this->controller.'/insert';
+			$data['ra'] = $this->getagent();
 			$this->myci->display_adm($this->view,$data);
 		}
 		
@@ -38,6 +39,9 @@
 				exit();
 			}
 			$data['password'] = md5($data['password']);
+			if($data['role']!='sales' && $data['role']!='sales_manager'){
+				$data['relatedaccount'] = 0;
+			}
 			$this->mydb->insert($this->tabel,$data);
 			echo"<script>alert('Data Saved Successfully'); window.location='".base_url().$this->redirect."'</script>";
 		}
@@ -54,6 +58,7 @@
 			$data['show']='form';
 			$data['tombol']='Update';
 			$data['_page_title'] = 'Update User';
+			$data['ra'] = $this->getagent();
 			$data['action']=$this->controller.'/run_update/'.$id;
 			$this->myci->display_adm($this->view,$data);
 		}
@@ -66,6 +71,9 @@
 				$data['password'] = md5($data['password']);
 			}
 			$data['id']=$id;
+			if($data['role']!='sales' && $data['role']!='sales_manager'){
+				$data['relatedaccount'] = 0;
+			}
 			$this->mydb->update($this->tabel,$data,$this->primary,$id);
 			echo"<script>alert('Data Updated Successfully'); window.location='".base_url().$this->redirect."'</script>";
 		}
@@ -129,7 +137,7 @@
 				
 				if($userfound){
 					$data['send'] = true;
-					$data['msg'] = 'We sent an email verification to you, it\'s only valid for 24 hours. Please check and follow the instruction that you see on the email.';
+					$data['msg'] = 'We sent an email verification to you, it\'s only valid for 1 hour. Please check and follow the instruction that you see on the email.';
 				}else{
 					$data['error'] = 'Username not found!';
 				}
@@ -157,7 +165,7 @@
 				$headers .= 'From: Magnus Angulus App <no-reply@villasofbali.com>' . "\r\n";
 				
 				$msg = '<p>Click link below to reset your password</p>';
-				$msg = '<a href="'.base_url().'changepassword/'.$q['id'].'/'.$token.'">Reset Password</a>';
+				$msg .= '<a href="'.base_url().'users/changepassword/'.$q['id'].'/'.$token.'">Reset Password</a>';
 				// Mail it
 				mail($to, $subject, $msg, $headers);
 				return true;
@@ -184,10 +192,20 @@
 		}
 		
 		public function do_changepassword(){
-			$pass = $this->input->post('password');
-			$c_pass = $this->input->post('c_password');
+			$data['password'] = md5($this->input->post('password'));
+			$uid = $this->input->post('uid');
 			
-			
+			$this->db->update('fn_users',$data,array('id'=>$uid));
+			$this->load->view('passwordchanged');
+		}
+		
+		public function getagent(){
+			$q = $this->db->query('SELECT id,name from fn_agent where occupation="Sales Agent"');
+			$agents[''] = 'Choose Agent';
+			foreach($q->result_array() as $qa){
+				$agents[$qa['id']] = $qa['name'];
+			}
+			return $agents;
 		}
 	}
 ?>

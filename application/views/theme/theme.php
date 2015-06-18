@@ -46,7 +46,7 @@
         
 		<?php echo $_menu; ?>
 
-        <div id="page-wrapper" class="puput-bg">
+        <div id="page-wrapper" class="<?php echo ($userrole=='admin') ? 'puput-bg' : ''; ?>">
             <div class="row">
                 <div class="col-lg-12">
                     <h1 class="page-header"><?php echo $_page_title; ?></h1>
