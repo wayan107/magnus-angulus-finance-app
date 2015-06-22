@@ -231,6 +231,7 @@ class Deals extends CI_Controller{
 									'currency'	=> $fee_payment_plan['fee_plan_currency'][$i],
 								);
 				}
+				
 			}
 			$pp_fee++;
 		}
@@ -272,31 +273,37 @@ class Deals extends CI_Controller{
 	}
 	
 	private function _set_commission_data(&$comm_data,&$deal_id){
-		$comm_data = array(
-				array(
-					'deal_id'	=> $deal_id,
-					'agent'		=> $_POST['sales_agent'],
-					'commission_type'	=> 'sales agent commission'
-				)
-			);
+		//$is_sales_manager = $this->myci->is_sales_manager($_POST['sales_agent']);
+		$sales_manager = $this->myci->get_the_sales_manager();
+
+		for($i=0; $i < count($_POST['fee_plan_amount']); $i++){
+			$ref = ($i<10) ? '0'.($i+1) : $i+1;
+			$comm_data[] = array(
+								'deal_id'			=> $deal_id,
+								'agent'				=> $_POST['sales_agent'],
+								'commission_type'	=> 'sales agent commission',
+								'pp_ref'			=> $ref
+							);
+	
+			if($sales_manager){
+				if($_POST['sales_agent']!=$sales_manager){
+					$comm_data[]=array(
+							'deal_id'			=> $deal_id,
+							'agent'				=> $sales_manager,
+							'commission_type'	=> 'sales manager commission',
+							'pp_ref'			=> $ref
+						);
+				}
+			}
+		}
 		
 		if(!empty($_POST['listing_agent'])){
 			$comm_data[]=array(
-					'deal_id'	=> $deal_id,
-					'agent'		=> $_POST['listing_agent'],
-					'commission_type'	=> 'listing agent commission'
+					'deal_id'			=> $deal_id,
+					'agent'				=> $_POST['listing_agent'],
+					'commission_type'	=> 'listing agent commission',
+					'pp_ref'			=> ''
 				);
-		}
-		
-		if(!$this->myci->is_sales_manager($_POST['sales_agent'])){
-			$sales_manager = $this->myci->get_the_sales_manager();
-			if($sales_manager){
-				$comm_data[]=array(
-						'deal_id'	=> $deal_id,
-						'agent'		=> $sales_manager,
-						'commission_type'	=> 'sales manager commission'
-					);
-			}
 		}
 	}
 	
@@ -310,7 +317,7 @@ class Deals extends CI_Controller{
 	
 	private function _update_agent_commission($datas){
 		foreach($datas as $data){
-			$q = $this->db->query('SELECT id from fn_agent_commission where deal_id="'.$data['deal_id'].'" and commission_type="'.$data['commission_type'].'"');
+			$q = $this->db->query('SELECT id from fn_agent_commission where deal_id="'.$data['deal_id'].'" and commission_type="'.$data['commission_type'].'" and pp_ref="'.$data['pp_ref'].'"');
 			if($q->num_rows()>0){
 				$q = $q->row();
 				$this->db->update('fn_agent_commission',$data,array('id'=>$q->id));

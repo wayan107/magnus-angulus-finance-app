@@ -26,7 +26,10 @@ class Dealsmodel extends CI_Model{
 	public function get_agent_dropdown($occupation,$default='Choose'){
 		$where_or = ($occupation=='Sales Agent') ? ' OR occupation="Sales manager"' : '';
 		$query=$this->db->query('select id,name from fn_agent where occupation="'.$occupation.'" '.$where_or);
+		
+		if(!empty($default))
 		$return=array(''=>$default);
+	
 		foreach($query->result_array() as $dt){
 			$return[$dt['id']]=$dt['name'];
 		}

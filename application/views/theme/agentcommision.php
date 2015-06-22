@@ -9,13 +9,13 @@
 				
 				<?php
 				if($this->myci->user_role!='sales'){
-					$sales = $this->dealsmodel->get_agent_dropdown('Sales Agent','All Sales Agent');
-					$sales[0]='Hide';
-					echo form_dropdown('sales',$sales);
-
-					$listing = $this->dealsmodel->get_agent_dropdown('Listing Agent','All Listing Agent');
-					$listing[0]='Hide';
-					echo form_dropdown('listing',$listing);
+					$sales = $this->dealsmodel->get_agent_dropdown('Sales Agent',null);
+					$listing = $this->dealsmodel->get_agent_dropdown('Listing Agent',null);
+					$agent = array(
+							''				=> 'Choose Agent',
+							'Sales Agent'	=> $sales,
+							'Listing Agent'	=> $listing);
+					echo form_dropdown('agent',$agent);
 				}
 				?>
 				<input type="submit" class="btn btn btn-primary" name="find" value="Find">

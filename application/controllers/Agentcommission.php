@@ -22,13 +22,7 @@
 		public function _view($offset=0){
 			$data['_page_title'] = $this->page_name;
 			$where ='where 1=1';
-			$listing_paid='';
-			$sales_paid='';
-			$sales_manager_paid='';
-			
-			$sales_manager = '';
-			$listing = '';
-			$sales = '';
+			$agent = '';
 			
 			//limit the sales agent view
 			if($this->myci->user_role=='sales'){
@@ -48,23 +42,13 @@
 				}
 				
 				if($_POST['paid']!=''){
-					$listing_paid = ' and listing_commission_paid="'.$_POST['paid'].'"';
-					$sales_paid = ' and sales_commission_paid="'.$_POST['paid'].'"';
-					$sales_manager_paid = ' and sales_manager_commission_paid="'.$_POST['paid'].'"';
+					$where .= ' and ac.paid="'.$_POST['paid'].'"';
 				}
 				
 				if($this->myci->user_role!='sales'){
-					if($_POST['sales']!=''){
-						$sales = ' and ag.id="'.$_POST['sales'].'"';
-						if(!$this->myci->is_sales_manager($_POST['sales'])){
-							$sales_manager = ' and ag.id="0"';
-						}
+					if($_POST['agent']!=''){
+						$agent = ' and ag.id="'.$_POST['agent'].'"';
 					}
-					
-					if($_POST['listing']!=''){
-						$listing = ' and ag.id="'.$_POST['listing'].'"';
-					}
-					
 				}
 			}
 			
@@ -72,12 +56,12 @@
 			$eur_rate = $this->myci->get_currency_rate('EUR','IDR',1);
 			$aud_rate = $this->myci->get_currency_rate('AUD','IDR',1);
 			
-			$fields = 'd.deal_date,d.villa_code,contract_number,ag.name as agent,
+			$fields = 'd.deal_date,d.villa_code,ag.name as agent,
 						ac.paid as comm_paid, ag.id as agent_id,
-						ag.occupation as type,ac.id as comm_paid_id,
+						ag.occupation as type,ac.id as comm_paid_id, contract_number, ref_number,
 						(CASE
 							WHEN ac.commission_type="sales agent commission" THEN
-								CONCAT(consult_fee_currency," ",CAST(FORMAT((consult_fee*ag.commission/100),0) as CHAR))
+								CONCAT(consult_fee_currency," ",CAST(FORMAT((pp.amount*ag.commission/100),0) as CHAR))
 							
 							WHEN ac.commission_type="listing agent commission" THEN
 								case when 
@@ -85,7 +69,7 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<99999999 then "IDR 500,000"
 										
 									when
@@ -93,7 +77,7 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<149999999 then "IDR 750,000"
 											
 									when
@@ -101,7 +85,7 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<299999999 then "IDR 1,000,000"
 											
 									when
@@ -109,7 +93,7 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<499999999 then "IDR 1,500,000"
 											
 									when
@@ -117,7 +101,7 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<749999999 then "IDR 2,000,000"
 											
 									when
@@ -125,7 +109,7 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<999999999 then "IDR 2,500,000"
 											
 									when
@@ -133,7 +117,7 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<1999999999 then "IDR 3,000,000"
 											
 									when
@@ -141,7 +125,7 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<2999999999 then "IDR 4,000,000"
 											
 									when
@@ -149,7 +133,7 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<3999999999 then "IDR 5,000,000"
 											
 									when
@@ -157,13 +141,13 @@
 											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
 											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
 											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price_currency
+											else d.deal_price
 										end)<4999999999 then "IDR 6,000,000"
 											
 									else "IDR 7.000.000" end
 							
 							WHEN ac.commission_type="sales manager commission" THEN
-								CONCAT(consult_fee_currency," ",CAST(FORMAT((consult_fee*5/100),0) as CHAR))
+								CONCAT(consult_fee_currency," ",CAST(FORMAT((pp.amount*5/100),0) as CHAR))
 						END) as comm_amount
 						';
 
@@ -172,6 +156,9 @@
 							from fn_agent_commission ac
 							inner join fn_deals d on ac.deal_id=d.id
 							inner join fn_agent ag on ag.id=ac.agent
+							left join fn_payment_plan pp on (pp.deal_id=ac.deal_id and ac.pp_ref=pp.ref_number and pp.type="fee")
+							'.$where.$agent.'
+							group by ac.id
 						');
 			//$query_paging=$query_paging->row();
 			$total_page=10;//$query_paging->num;

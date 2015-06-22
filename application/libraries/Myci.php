@@ -499,7 +499,8 @@ class Myci{
 				$table_row++;
 				for($i=0;$i<$jumField;$i++){
 					if($fields[$i]=='contract_number'){
-						$item_row[$i+1]=anchor('deals/viewdetail/'.$dts['id'],$dts[$fields[$i]],array('class'=>'button-view pop-up','title'=>'see deal details'));
+						$text = (!empty($dts['ref_number'])) ? $dts[$fields[$i]].'-'.$dts['ref_number'] : $dts[$fields[$i]];
+						$item_row[$i+1]=anchor('deals/viewdetail/'.$dts['id'],$text,array('class'=>'button-view pop-up','title'=>'see deal details'));
 					}else{
 						$item_row[$i+1]=$dts[$fields[$i]];
 					}
