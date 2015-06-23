@@ -159,9 +159,19 @@
 							left join fn_payment_plan pp on (pp.deal_id=ac.deal_id and ac.pp_ref=pp.ref_number and pp.type="fee")
 							'.$where.$agent.'
 							group by ac.id
+							limit '.$offset.' , '.$this->limit.'
 						');
-			//$query_paging=$query_paging->row();
-			$total_page=10;//$query_paging->num;
+			
+			$query_paging = $this->db->query('SELECT ac.id
+							from fn_agent_commission ac
+							inner join fn_deals d on ac.deal_id=d.id
+							inner join fn_agent ag on ag.id=ac.agent
+							left join fn_payment_plan pp on (pp.deal_id=ac.deal_id and ac.pp_ref=pp.ref_number and pp.type="fee")
+							'.$where.$agent.'
+							group by ac.id
+						');
+						
+			$total_page=$query_paging->num_rows();
 			$table_header='Deal Date,Villa Code,Contract Number,Agent,Commission';
 			$field='deal_date,villa_code,contract_number,agent,comm_amount';
 			$data['page']=$this->myci->page2($total_page,$this->limit,$this->controller,3);
@@ -240,6 +250,11 @@
 		
 		private function _set_commision_payment_status($ac_id,$data){
 			$this->db->update('fn_agent_commission',$data,array('id'=>$ac_id));
+		}
+		
+		public function delete($id){
+			$this->db->delete('fn_agent_commission',array('id'=>$id));
+			redirect($this->controller);
 		}
 	}
 ?>

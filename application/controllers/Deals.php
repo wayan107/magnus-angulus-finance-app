@@ -61,10 +61,12 @@ class Deals extends CI_Controller{
 		$deal_id = $this->mydb->insert($this->tabel,$data);
 		$this->_save_payment_plans($deal_id);
 		
-		$comm_data = array();
-		$this->_set_commission_data($comm_data,$deal_id);
+		if($this->_is_submit_sales_manager_commission($data['deal_date'])){
+			$comm_data = array();
+			$this->_set_commission_data($comm_data,$deal_id);
 
-		$this->_save_agent_commission($comm_data,true);
+			$this->_save_agent_commission($comm_data,true);
+		}
 		
 		echo"<script>alert('Data Saved Successfully'); window.location='".base_url().$this->redirect."'</script>";
 	}
@@ -129,9 +131,11 @@ class Deals extends CI_Controller{
 		$this->mydb->update($this->tabel,$data,$this->primary,$id);
 		$this->_save_payment_plans($id);
 		
-		$comm_data = array();
-		$this->_set_commission_data($comm_data,$id);
-		$this->_update_agent_commission($comm_data);
+		if($this->_is_submit_sales_manager_commission($data['deal_date'])){
+			$comm_data = array();
+			$this->_set_commission_data($comm_data,$id);
+			$this->_update_agent_commission($comm_data);
+		}
 		
 		echo"<script>alert('Data Updated Successfully'); window.location='".base_url().$this->redirect."'</script>";
 	}
@@ -273,7 +277,6 @@ class Deals extends CI_Controller{
 	}
 	
 	private function _set_commission_data(&$comm_data,&$deal_id){
-		//$is_sales_manager = $this->myci->is_sales_manager($_POST['sales_agent']);
 		$sales_manager = $this->myci->get_the_sales_manager();
 
 		for($i=0; $i < count($_POST['fee_plan_amount']); $i++){
@@ -329,6 +332,14 @@ class Deals extends CI_Controller{
 	
 	private function _delete_agent_commissions($deal_id){
 		$this->db->delete('fn_agent_commission',array('deal_id'=>$deal_id));
+	}
+	
+	private function _is_submit_sales_manager_commission($deal_date){
+		if(strtotime($deal_date) > strtotime('2015-06-15')){
+			return true;
+		}
+		
+		return false;
 	}
 }
 ?>

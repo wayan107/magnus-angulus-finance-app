@@ -511,12 +511,12 @@ class Myci{
 				$button_toogle = ($this->user_role=='admin') ? anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts['ac_id'].'-'.$dts['agent_id'],'data-type'=>$dts['type'])) : '<span class="circle-button '.$button_class.'" title="'.$button_title.'"></span>';
 				
 				$buttons=array(
-					$button_toogle
-					//anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts[$primary].'-'.$dts['agent_id'],'data-type'=>$dts['type']))
+					$button_toogle,
+					anchor($controller.'/delete/'.$dts['ac_id'],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')"))
 				);
 				if($dts[$value]==1) array_push($buttons,anchor($controller.'/viewdetail/'.$dts['comm_paid_id'],'<i class="fa fa-search-plus"></i>',array('class'=>'button-view pop-up','title'=>'see payment details')));
 				
-				//$cel=array('data'=>anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit'))." ".anchor($controller.'/delete/'.$dts[$primary],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')")), 'class'=>'aksi');
+				//$cel=array('data'=>, 'class'=>'aksi');
 				$cel=array('data'=>implode(' ',$buttons),'class'=>'aksi');
 				$item_row[$i+1]=$cel;
 				
