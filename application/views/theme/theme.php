@@ -65,27 +65,27 @@
 		var baseurl = '<?php echo base_url(); ?>';
 	</script>
     <!-- jQuery -->
-    <script src="<?php echo base_url(); ?>/asset/bower_components/jquery/dist/jquery.min.js"></script>
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.2.1/jquery.form-validator.min.js"></script>
+	
     <!-- Bootstrap Core JavaScript -->
-    <script src="<?php echo base_url(); ?>/asset/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="<?php echo base_url(); ?>asset/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
 
     <!-- Metis Menu Plugin JavaScript -->
-    <script src="<?php echo base_url(); ?>/asset/bower_components/metisMenu/dist/metisMenu.min.js"></script>
+    <script src="<?php echo base_url(); ?>asset/bower_components/metisMenu/dist/metisMenu.min.js"></script>
     
-    <script src="<?php echo base_url(); ?>/asset/dist/js/my-js-small-plugin.js"></script>
-	<script src="<?php echo base_url(); ?>/asset/dist/js/sb-admin-2.js"></script>
-	
+    <script src="<?php echo base_url(); ?>asset/dist/js/my-js-small-plugin.js"></script>
+	<script src="<?php echo base_url(); ?>asset/dist/js/sb-admin-2.js"></script>
+
 	<?php if($this->myci->is_home()){ ?>
 		<script>
 			var salesData = '<?php echo $datasales; ?>';
 			salesData = JSON.parse(salesData);
 		</script>
 		 <!-- Morris Charts JavaScript -->
-		<script src="<?php echo base_url(); ?>/asset/bower_components/raphael/raphael-min.js"></script>
+		<script src="<?php echo base_url(); ?>asset/bower_components/raphael/raphael-min.js"></script>
 		<script src="<?php echo base_url(); ?>asset/bower_components/morrisjs/morris.min.js"></script>
-		<script src="<?php echo base_url(); ?>/asset/js/morris-data.js"></script>
+		<script src="<?php echo base_url(); ?>asset/js/morris-data.js"></script>
 	<?php }
 		
 		if(!$this->myci->is_home()){
@@ -118,10 +118,6 @@
 		function confirmExit(){
 			return "You have attempted to leave this page.  If you have made any changes to the fields without clicking the Save button, your changes will be lost.";
 		}
-		
-		$.validate({
-			modules : 'html5'
-		});
 	});
 	</script>
 	<?php } ?>
