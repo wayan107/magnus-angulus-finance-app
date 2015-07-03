@@ -56,14 +56,14 @@ class Dashboard extends CI_Controller {
 	
 	private function money($type){
 		if($type=='in'){
-			$currency = 'payment_currency';
-			$field = 'paid_amount';
-			$where = 'pay_date';
+			$currency = 'pp.payment_currency';
+			$field = 'pp.paid_amount';
+			$where = 'AND EXTRACT(MONTH FROM pp.pay_date)="'.date('m').'"';
 			$paid_status = 1;
 		}elseif($type=='on'){
-			$currency = 'currency';
-			$field = 'amount';
-			$where = 'date';
+			$currency = 'pp.currency';
+			$field = 'pp.amount';
+			$where = '';
 			$paid_status = 0;
 		}
 		
@@ -75,8 +75,8 @@ class Dashboard extends CI_Controller {
 										ELSE '.$field.'
 									END
 									),0) as amount
-									from fn_payment_plan
-									WHERE EXTRACT(MONTH FROM '.$where.')="'.date('m').'" AND paid="'.$paid_status.'"');
+									from fn_payment_plan pp
+									WHERE pp.paid="'.$paid_status.'" AND pp.type="fee" '.$where);
 		$row = $query->row();
 		return $row->amount;
 	}

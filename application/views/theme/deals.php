@@ -2,6 +2,7 @@
 if($show=='form'){
 	echo form_open($action,array('id'=>'deals-form'));
 	?>
+	<input type="hidden" name="post-status" value="finalized-deal">
 	<div class="row"><!--start Row-->
 		<div class="col-sm-4 section">
 			<div class="title">Contract Number</div>

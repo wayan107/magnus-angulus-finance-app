@@ -10,12 +10,13 @@ class Deals extends CI_Controller{
 		private $textbox=array('id','villa_code','client','owner','checkin_date','checkout_date','deal_date',
 								'deal_price','deal_price_currency','consult_fee','consult_fee_currency','area',
 								'deposit','deposit_currency','deposit_in','contract_number','sales_agent','listing_agent',
-								'date_created','remark');
+								'date_created','remark','post_status');
 		
 	public function __construct(){
 		parent::__construct();
 		$this->tabel=$this->db->dbprefix('deals');
 		$this->load->model('dealsmodel');
+		$this->config->load('inquiry_config');
 	}
 	
 	public function index($offset=0){
@@ -152,7 +153,8 @@ class Deals extends CI_Controller{
 		$data['filter_class'] = ($this->myci->user_role=='admin') ? 'pull-right' : '';
 		$field='deal_date,villa_code,contract_number,CONCAT(deal_price_currency," ",CAST(FORMAT(deal_price,0) as CHAR)) as deal_amount';
 		$data['_page_title'] = $this->page_name;
-		$where='where 1=1';
+
+		$where='where (post_status="'.$this->config->item('deal').'" or post_status="'.$this->config->item('finalized_deal').'") and 1=1';
 		if(!empty($_POST['filter'])){
 			if($_POST['area']){
 				$where .= " and area='".$_POST['area']."'";
@@ -179,6 +181,49 @@ class Deals extends CI_Controller{
 		$table_header='Deal Date,Villa Code,Contract Number,Client,Deal Amount';
 		$field='deal_date,villa_code,contract_number,client_name,deal_amount';
 		$data['page']=$this->myci->page($this->tabel,$this->limit,$this->controller,3);
+		$data['show']='data';
+		$data['tabel']=$this->myci->table_admin($query,$field,$table_header,$this->controller,$this->primary,true);
+		$this->myci->display_adm('theme/'.$this->view,$data);
+	}
+	
+	public function inquiries($offset=0){
+		if($this->myci->is_user_logged_in()){
+			$this->_view_inquary($offset);
+		}
+	}
+	
+	private function _view_inquary($offset=0){
+		$data['add']=($this->myci->user_role=='admin') ? anchor($this->controller.'/add/inquiry','Add New',array('class'=>'btn btn-primary')) : '';
+		$data['filter_class'] = ($this->myci->user_role=='admin') ? 'pull-right' : '';
+		$field='deal_date,villa_code,contract_number,CONCAT(deal_price_currency," ",CAST(FORMAT(deal_price,0) as CHAR)) as deal_amount';
+		$data['_page_title'] = $this->page_name;
+		$where='where post_status="inquiry" and 1=1';
+		if(!empty($_POST['filter'])){
+			if($_POST['area']){
+				$where .= " and area='".$_POST['area']."'";
+			}
+			
+			if($_POST['date-start'] && $_POST['date-end']){
+				$date_start=new DateTime($_POST['date-start'] .' 00:00:00');
+				$date_end=new DateTime($_POST['date-end'] .' 00:00:00');
+				$where .=' and deal_date between CAST("'.$date_start->format('Y-m-d').'" as DATE) and CAST("'.$date_end->format('Y-m-d').'" as DATE)';
+			}
+			
+			if(!empty($_POST['search'])){
+				$s=$_POST['search'];
+				$where .= ' and (c.name like "%'.$s.'%" or villa_code like "%'.$s.'%" or contract_number like "%'.$s.'%")';
+			}
+		}
+		
+		$query=$this->db->query("select fn_deals.id,$field,c.name as client_name
+								from ".$this->tabel."
+								inner join fn_client c on c.id=fn_deals.client
+								$where
+								order by deal_date DESC
+								limit $offset , ".$this->limit);
+		$table_header='Deal Date,Villa Code,Contract Number,Client,Deal Amount';
+		$field='deal_date,villa_code,contract_number,client_name,deal_amount';
+		$data['page']=$this->myci->page($this->tabel,$this->limit,$this->controller,4);
 		$data['show']='data';
 		$data['tabel']=$this->myci->table_admin($query,$field,$table_header,$this->controller,$this->primary,true);
 		$this->myci->display_adm('theme/'.$this->view,$data);
@@ -268,9 +313,12 @@ class Deals extends CI_Controller{
 	}
 	
 	private function _is_payment_complete($id){
-		$query = $this->db->query('select count(id) as unpaid from fn_payment_plan where deal_id="'.$id.'" and paid="0" and type="fee"');
+		$query = $this->db->query('select count(pp.id) as unpaid, d.post_status
+									from fn_payment_plan pp
+									inner join fn_deals d on d.id=pp.deal_id
+									where pp.paid="0" and pp.type="fee"');
 		$row = $query->row();
-		if($row->unpaid>0)
+		if($row->unpaid>0 || $row->post_status=='Deal')
 			return false;
 		
 		return true;
@@ -338,7 +386,6 @@ class Deals extends CI_Controller{
 		if(strtotime($deal_date) > strtotime('2015-06-15')){
 			return true;
 		}
-		
 		return false;
 	}
 }

@@ -8,7 +8,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>SB Admin 2 - Bootstrap Admin Theme</title>
+    <title>Magnus Angulus Finance App</title>
 	
 	 <link rel="stylesheet" href="https://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
   
@@ -98,14 +98,14 @@
 			<?php
 		}
 	?>
-	
+
     <!-- Custom Theme JavaScript -->
-    
 	<?php
 	$url=$_SERVER['REQUEST_URI'];
 	preg_match('/deals\/add/',$url,$deal_add);
-	$url=$_SERVER['REQUEST_URI'];
+	//$url=$_SERVER['REQUEST_URI'];
 	preg_match('/deals\/update/',$url,$deal_update);
+	preg_match('/inquiries/',$url,$inquiries);
 	
 	if(!empty($deal_add) || !empty($deal_update)){
 	?>
@@ -120,7 +120,14 @@
 		}
 	});
 	</script>
-	<?php } ?>
+	<?php }
+	
+	if(!empty($inquiries)){
+		?>
+		<script src="<?php echo base_url(); ?>asset/dist/js/inquiries.js"></script>
+		<?php
+	}
+	?>
 </body>
 
 </html>

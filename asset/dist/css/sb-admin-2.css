@@ -587,7 +587,7 @@ a.circle-button:hover{
   background-size: cover;
 }
 
-.puput-bg .page-header, .puput-bg form label, .puput-bg form .title{color:#fff;}
+.puput-bg .page-header, .puput-bg form .title{color:#fff;} /*.puput-bg form label, */
 
 span.status-complete i {
   color: lime;
@@ -649,3 +649,12 @@ a {
 .table-hover>tbody>tr:hover {
   background-color: #ADCD16;
 }
+
+.secions{margin:20px 0;}
+ul#area-list li {
+  display: inline-block;
+  list-style: none;
+  width: 30%;
+}
+
+#casebox,#case,#dealdatebox{display:none;}

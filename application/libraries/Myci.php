@@ -375,6 +375,90 @@ class Myci{
 			
 	}
 	
+	function table_inquiry($query,$field='',$as='',$controller,$primary,$see_details=false){
+			$this->ci->load->library('table');
+			$tmpl = array (
+                    'table_open'          => '<table border="0" class="table table-striped table-bordered table-hover data-table">',
+
+                    'heading_row_start'   => '<tr>',
+                    'heading_row_end'     => '</tr>',
+                    'heading_cell_start'  => '<th>',
+                    'heading_cell_end'    => '</th>',
+
+                    'row_start'           => '<tr>',
+                    'row_end'             => '</tr>',
+                    'cell_start'          => '<td>',
+                    'cell_end'            => '</td>',
+
+                    'row_alt_start'       => '<tr>',
+                    'row_alt_end'         => '</tr>',
+                    'cell_alt_start'      => '<td>',
+                    'cell_alt_end'        => '</td>',
+
+                    'table_close'         => '</table>'
+              );
+			
+			$this->ci->table->set_template($tmpl); 
+			$this->ci->table->set_empty('&nbsp;');
+
+			//$heading[0]='No';
+			if(!empty($field)){
+				$heading=explode(',',$as);
+				$fields=explode(',',$field);
+			}else{
+				$n=0;
+				foreach($query->list_fields() as $fild){
+					$fields[$n]=$fild;
+					$heading[$n]=str_replace("_"," ", $fild);
+					$n++;
+				}
+			}
+			
+			$jumField=count($fields);
+			array_unshift($heading,'No');
+			array_push($heading,'Action');
+			$this->ci->table->set_heading($heading);
+			$table_row=1;
+			
+			foreach($query->result_array() as $dts){
+			
+			//pembuatan baris data dlm bentuk array (data berasal dari dari query)
+
+				$item_row[0]=$table_row; 
+				$table_row++;
+				for($i=0;$i<$jumField;$i++){
+					
+					$item_row[$i+1]=$dts[$fields[$i]];
+					
+				}
+				if($this->user_role=='sales_manager'){
+					$buttons=array(
+						anchor($controller.'/assign/'.$dts[$primary],'<i class="fa fa-share-square"></i>',array('class'=>'setbutton','title'=>'Label This inquiry to sales agent')),
+						anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit','title'=>'Update')),
+						anchor($controller.'/delete/'.$dts[$primary],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')",'title'=>'Delete'))
+					);
+				}else{
+					$buttons=array();
+				}
+				
+				if($this->user_role=='sales_manager' || $this->user_role=='sales'){
+					array_unshift($buttons,anchor($controller.'/setstatus/'.$dts[$primary],'<i class="fa fa-question-circle"></i>',array('class'=>'setbutton','title'=>'Set Inquiry Status')));
+				}
+				
+				if($see_details) array_unshift($buttons,anchor($controller.'/viewdetail/'.$dts[$primary],'<i class="fa fa-search-plus"></i>',array('class'=>'button-view pop-up','title'=>'See detail')));
+				
+				//$cel=array('data'=>anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit'))." ".anchor($controller.'/delete/'.$dts[$primary],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')")), 'class'=>'aksi');
+				$cel=array('data'=>implode(' ',$buttons),'class'=>'aksi');
+				$item_row[$i+1]=$cel;
+				
+				//pembuatan baris pada tabel dan memasukkan data 
+				$this->ci->table->add_row($item_row);
+			
+			}
+			return $this->ci->table->generate();
+			
+	}
+	
 	function table_active($query,$field='',$as='',$controller,$primary,$value,$action_name){
 			$this->ci->load->library('table');
 			$tmpl = array (
