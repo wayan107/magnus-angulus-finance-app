@@ -20,7 +20,14 @@
 			</div>
 			<div class="col-sm-2">
 				<h3>Budget</h3>
-				<p><?php echo ($dt['plan']=='0') ? $rental_budget[$dt['budget']] : $sale_budget[$dt['budget']]; ?></p>
+				<p><?php $budget_list = ($dt['plan']=='0') ? $rental_budget : $sale_budget; 
+					if(!empty($dt['budget'])){
+					$budgets = explode(',',$dt['budget']);
+						foreach($budgets as $budget){
+							echo $budget_list[$budget].'<br>';
+						}
+					}
+				?></p>
 			</div>
 			<div class="col-sm-2">
 				<h3>Assigned To</h3>
@@ -37,7 +44,7 @@
 			</div>
 			<div class="col-sm-2">
 				<h3>Bedroom</h3>
-				<p><?php echo $dt['bedroom']; ?> Bedroom</p>
+				<p><?php echo (!empty($dt['bedroom'])) ? $dt['bedroom'].' Bedrooms' : ''; ?></p>
 			</div>
 			<div class="col-sm-2">
 				<h3>Furnishing</h3>
@@ -50,18 +57,43 @@
 									
 									case '3'	: echo 'Unfurnished';
 									break;
+									
+									default		: echo 'Any Furnishing';
+									break;
 								}; ?></p>
 			</div>
 			<div class="col-sm-2">
 				<h3>Living</h3>
-				<p><?php echo ($dt['living']=='1') ? 'Open Living' : 'Close living'; ?></p>
+				<p><?php //echo ($dt['living']=='1') ? 'Open Living' : 'Close living';
+						switch ($dt['living']){
+							case '1'	: echo 'Open Living';
+							break;
+							
+							case '2'	: echo 'Closed Living';
+							break;
+							
+							default		: echo 'Any Living';
+							break;
+						};
+				?></p>
+			</div>
+			<div class="col-sm-2">
+				<h3>Status</h3>
+				<p><?php echo $dt['post_status']; ?></p>
 			</div>
 		</div>
 		
 		<div class="divider"></div>
 		
 		<div class="row secions">
-			<div class="col-sm-12">
+			<?php if(!empty($dt['lost_case'])){ ?>
+			<div class="col-sm-2">
+				<h3>Lost case</h3>
+				<p><?php echo $dt['lost_case']; ?></p>
+			</div>
+			<?php } ?>
+			
+			<div class="col-sm-4">
 				<h3>Preferable Areas</h3>
 				<ul class="area-list">
 					<?php

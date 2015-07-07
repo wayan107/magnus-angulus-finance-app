@@ -37,7 +37,7 @@ if($show=='form'){
 						<label>Budget: </label>
 						<span id="budget">
 						<?php
-							echo form_dropdown('budget',$initial_budget,$budget,'class="form-control" required');
+							echo form_dropdown('budget[]',$initial_budget,$budget,'class="form-control" id="budget" multiple="multiple"');
 						?>
 						</span>
 					</div>
@@ -47,7 +47,26 @@ if($show=='form'){
 					</div>
 					<div class="col-sm-4">
 						<label>Bedroom: </label>
-						<input type="number" class="form-control" name="bedroom" value="<?php echo $bedroom; ?>">
+						<select name="bedroom[]" multiple="multiple" id="bedroom">
+						<?php
+							$bedroom_list = array(
+												'1' => '1 Bedroom',
+												'2'	=> '2 Bedrooms',
+												'3'	=> '3 Bedrooms',
+												'4'	=> '4 Bedrooms',
+												'5+'	=> '5+ Bedrooms'
+											);
+							foreach($bedroom_list as $key=>$val){
+								$selected = '';
+								if(!empty($bedroom)){
+									$selected = (in_array($key,$bedroom)) ? 'selected' : '';
+								}
+								?>
+									<option value="<?php echo $key; ?>" <?php $selected ?>><?php echo $val; ?></option>
+								<?php
+							}
+						?>
+						</select>
 					</div>
 				</div>
 				
@@ -79,12 +98,13 @@ if($show=='form'){
 					<div class="col-sm-4">
 						<label>Interested Villas: </label>
 						<?php
+							$villas = '';
 							$interested_villa = unserialize($interested_villa);
-							if(!empty($interested_villa['villalink'])){
-								$interested_villa = implode(',',$interested_villa['villalink']);
+							if(!empty($interested_villa['villacode'])){
+								$villas = implode(',',$interested_villa['villacode']);
 							}
 						?>
-						<input type="text" class="form-control" name="interested_villa" value="<?php echo $interested_villa; ?>">
+						<input type="text" class="form-control" name="interested_villa" value="<?php echo $villas; ?>">
 					</div>
 					
 				</div>

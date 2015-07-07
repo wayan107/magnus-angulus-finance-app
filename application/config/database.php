@@ -64,10 +64,10 @@ $query_builder = TRUE;
 
 $db['default'] = array(
 	'dsn'	=> '',
-	'hostname' => 'localhost',
-	'username' => 'root',
-	'password' => '',
-	'database' => 'magnusangulusfinanceapp',
+	'hostname' => 'magnusfinanceapp.db.9057490.hostedresource.com',
+	'username' => 'magnusfinanceapp',
+	'password' => 'Somplakisme2015!',
+	'database' => 'magnusfinanceapp',
 	'dbdriver' => 'mysqli',
 	'dbprefix' => 'fn_',
 	'pconnect' => FALSE,

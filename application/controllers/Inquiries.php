@@ -19,7 +19,6 @@ class Inquiries extends CI_Controller{
 		$this->config->load('inquiry_config');
 		
 		$this->rental_budget = array(
-									''	=> 'Choose',
 									'1'	=> 'IDR 0 - IDR 100 M',
 									'2'	=> 'IDR 100 - IDR 200 M',
 									'3'	=> 'IDR 200 - IDR 300 M',
@@ -27,7 +26,6 @@ class Inquiries extends CI_Controller{
 								);
 		
 		$this->sale_budget = array(
-									''	=> 'Choose',
 									'1'	=> 'USD 0 - USD 250 K',
 									'2'	=> 'USD 250 - USD 500 K',
 									'3'	=> 'USD 500 - USD 750 K',
@@ -66,7 +64,8 @@ class Inquiries extends CI_Controller{
 		
 		$date = new DateTime($data['plan_move_in'].' 00:00:00');
 		$data['plan_move_in'] = $date->format('Y-m-d');
-		
+		$data['budget'] = implode(',',$data['budget']);
+		$data['bedroom'] = implode(',',$data['bedroom']);
 		$data['post_status'] = 'Prospect';
 		$data['interested_villa'] = $this->_format_interested_villa();
 		$deal_id = $this->mydb->insert($this->tabel,$data);
@@ -88,6 +87,8 @@ class Inquiries extends CI_Controller{
 		$data['readonly']='readonly';
 		$data['show']='form';
 		$data['tombol']='Update';
+		$data['budget'] = explode(',',$data['budget']);
+		$data['bedroom'] = explode(',',$data['bedroom']);
 		$data['action']=$this->controller.'/run_update/'.$id;
 		$data['cancel']=base_url().$this->controller;
 		$data['areas_prefer'] = $this->area->get_area_basedon_inquiry($id);
@@ -107,7 +108,8 @@ class Inquiries extends CI_Controller{
 		
 		$date = new DateTime($data['plan_move_in'].' 00:00:00');
 		$data['plan_move_in'] = $date->format('Y-m-d');
-		
+		$data['budget'] = implode(',',$data['budget']);
+		$data['bedroom'] = implode(',',$data['bedroom']);
 		$data['interested_villa'] = $this->_format_interested_villa();
 		$this->mydb->update($this->tabel,$data,$this->primary,$id);
 		$this->_delete_area($id);
@@ -141,23 +143,28 @@ class Inquiries extends CI_Controller{
 			}
 		}
 		
-		$query=$this->db->query("select fn_deals.id,$field,c.name as client_name
+		$sql = "select fn_deals.id,$field,c.name as client_name
 								from ".$this->tabel."
 								inner join fn_client c on c.id=fn_deals.client
 								left join fn_agent ag on ag.id=fn_deals.sales_agent
-								$where
+								$where";
+		$query=$this->db->query($sql."
 								order by inquiry_date DESC
 								limit $offset , ".$this->limit);
+		$q_page = $this->db->query($sql);
 		$table_header='Inquiry Date,Client,Plan,Plan Move in,Assigned To,Last Status';
 		$field='inquiry_date,client_name,plan,plan_move_in,agent,post_status';
-		$data['page']=$this->myci->page($this->tabel,$this->limit,$this->controller,4);
+		$data['page']=$this->myci->page2($q_page->num_rows(),$this->limit,$this->controller,4);
 		$data['show']='data';
 		$data['tabel']=$this->myci->table_inquiry($query,$field,$table_header,$this->controller,$this->primary,true);
 		$this->myci->display_adm('theme/'.$this->view,$data);
 	}
 	
 	public function viewdetail($id){
-		$data['query']=$this->db->query('select d.inquiry_date,d.budget,d.plan,d.plan_move_in,d.bedroom,d.furnishing,d.living,c.name as client_name,ag.name as agent
+		$data['query']=$this->db->query('select d.inquiry_date,d.budget,d.plan,d.plan_move_in,d.bedroom,
+											d.furnishing,d.living,c.name as client_name,ag.name as agent,
+											d.post_status,d.lost_case
+											
 											from fn_deals d
 											inner join fn_client c on c.id=d.client
 											left join fn_agent ag on ag.id=d.sales_agent
@@ -203,6 +210,7 @@ class Inquiries extends CI_Controller{
 	public function saveassign(){
 		$data['sales_agent'] = $_POST['agent'];
 		$this->db->update('deals',$data,array('id'=>$_POST['id']));
+		$this->_sendemaillabel($_POST['id']);
 		echo 1;
 	}
 	
@@ -226,27 +234,139 @@ class Inquiries extends CI_Controller{
 		echo 1;
 	}
 	
-	public function sendemaillabel($id){
-		
+	private function _sendemaillabel($id){
+		$query = $this->db->query('
+								SELECT ag.email as agent_email,cl.email as client_email,cl.name as client,
+										d.interested_villa, d.inquiry_msg, d.plan_move_in, d.bedroom, d.furnishing,
+										d.living, d.plan,d.budget
+								FROM fn_deals d
+								INNER JOIN fn_agent ag on ag.id=d.sales_agent
+								INNER JOIN fn_client cl on cl.id=d.client
+								WHERE d.id="'.$id.'"
+							');
+		if($query->num_rows()>0){
+			$q = $query->row();
+			$to = $q->agent_email;
+			$subject = 'New Inquiry';
+			$headers  = 'MIME-Version: 1.0' . "\r\n";
+			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+			// Additional headers
+			$headers .= 'From: '.$q->client.' <'.$q->client_email.'>' . "\r\n";
+			$headers .= 'Cc: info@balilongtermrentals.com' . "\r\n";
+			$msg = '<p>Name : '.$q->client.'</p>';
+			
+			$interested_villas = unserialize($q->interested_villa);
+			if(!empty($interested_villas['villacode'])){
+				$villalink='';
+				$index=0;
+				foreach($interested_villas['villacode'] as $code){
+					if(!empty($interested_villas['villalink'])){
+						$villalink .= '<a href="'.$interested_villas['villalink'][$index].'">'.$code.'</a>, ';
+						$index++;
+					}else
+						$villalink .= $code.', ';
+				}
+				
+				$msg .= '<p>Interested Villa : '.substr($villalink,0,strlen($villalink)-2).'</p>';
+				if(!empty($interested_villas['price'])){
+					$msg .= '<p>Price :'.implode(', ',$interested_villas['price']).'</p>';
+				}
+			}
+			
+			$additional_msg = '';
+			if(!empty($q->plan_move_in)) $additional_msg .= '<p>Move in date : '.$q->plan_move_in.'</p>';
+			
+			$budgets_list = array();
+			$additional_msg .= '<p>Plan : '; 
+			if($q->plan=='0'){
+				$additional_msg .= 'Rent</p>';
+				$budgets_list = $this->rental_budget;
+			}else{
+				$additional_msg .= 'Buy</p>';
+				$budgets_list = $this->sale_budget;
+			}
+			
+			if(!empty($q->budget)){
+				$budgets = explode(',',$q->budget);
+				$additional_msg .= '<p>Budget : ';
+				foreach($budgets as $b){
+					$additional_msg .= $budgets_list[$b].', ';
+				}
+				$additional_msg .= '</p>';
+			}
+			
+			if(!empty($q->bedroom)) $additional_msg .= '<p>Bedrooms : '.$q->bedroom.'</p>';
+			if(!empty($q->furnishing)){
+				$additional_msg .= '<p>Furnishing : ';
+				switch ($q->furnishing){
+					case '1'	: $additional_msg .= 'Furnished';
+					break;
+					
+					case '2'	: $additional_msg .= 'Semi-Furnished';
+					break;
+					
+					case '3'	: $additional_msg .= 'Unfurnished';
+					break;
+					
+					default		: $additional_msg .= 'Any Furnishing';
+					break;
+				}
+				$additional_msg .= '</p>';
+			}
+			
+			if(!empty($q->living)){
+				$additional_msg .= '<p>Living : ';
+				switch ($q->living){
+					case '1'	: $additional_msg .= 'Open Living';
+					break;
+					
+					case '2'	: $additional_msg .= 'Closed Living';
+					break;
+					
+					default		: $additional_msg .= 'Any Living';
+					break;
+				}
+				$additional_msg .= '</p>';
+			}
+			
+			$preferable_areas = $this->area->get_area_basedon_inquiry($id,true);
+			if(!empty($preferable_areas)) $additional_msg .= '<p>Preferable Areas : '.implode(', ',$preferable_areas).'</p>';
+			
+			if(!empty($additional_msg)) $msg .= '<br><p><strong>Additional Information :</strong></p>'.$additional_msg;
+			
+			if(!empty($q->inquiry_msg)){
+				$msg .= '<br><p><strong>Prospect Message :</strong></p>';
+				$msg .= '<p>'.$q->inquiry_msg.'</p>';
+			}
+			
+			// Mail it
+			mail($to, $subject, $msg, $headers);
+		}
 	}
 	
 	public function insertcurl(){
 		$data=$this->myci->post($this->textbox);
 		
-		//$date = date('Y-m-d');//new DateTime($data['inquiry_date'].' 00:00:00');
 		$data['inquiry_date'] = date('Y-m-d');//$date->format('Y-m-d');
 		
 		$date = new DateTime($data['plan_move_in'].' 00:00:00');
 		$data['plan_move_in'] = $date->format('Y-m-d');
 		
 		$data['post_status'] = 'Prospect';
-		$data['inquiry_msg'] = 
+		
+		$client_data['name'] = $data['client'];
+		$client_data['email'] = $_POST['email'];
+		$client_data['phone'] = $_POST['phone'];
+		$client_id = $this->_add_new_client($client_data);
+		$data['client'] = $client_id;
+		
 		$deal_id = $this->mydb->insert($this->tabel,$data);
 		$this->_save_area_curl($deal_id);
-		echo"<script>alert('Data Saved Successfully'); window.location='".base_url().$this->redirect."'</script>";
+		return 'success';
+		//echo"<script>alert('Data Saved Successfully'); window.location='".base_url().$this->redirect."'</script>";
 	}
 	
-	private function _save_area_curl($id){
+	private function _save_area_curl($deal_id){
 		$areas = json_decode(stripslashes($this->input->post('area')));
 		if(!empty($areas)){
 			$data = array();
@@ -262,10 +382,21 @@ class Inquiries extends CI_Controller{
 	
 	private function _format_interested_villa(){
 		$interested_villa = $this->input->post('interested_villa');
-		$interested_villa = array('price'=>'','villalink' => explode(',',$interested_villa));
+		$interested_villa = array('price'=>'','villalink'=>'','villacode'=>explode(',',$interested_villa));
 		$interested_villa = serialize($interested_villa);
 		
 		return $interested_villa;
+	}
+	
+	private function _add_new_client($data){
+		$q = $this->db->query('select id from fn_client where name="'.$data['name'].'"');
+		if($q->num_rows()>0){
+			$q = $q->row();
+			return $q->id;
+		}else{
+			$this->db->insert('client',$data);
+			return $this->db->insert_id();
+		}
 	}
 }
 ?>

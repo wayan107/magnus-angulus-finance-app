@@ -128,6 +128,26 @@
 		<?php
 	}
 	?>
+	<?php preg_match('/inquiries/',$url,$inquiry_add);
+		if(!empty($inquiry_add)){ ?>
+		<link rel="stylesheet" href="<?php echo base_url(); ?>asset/multiselect/jquery.multiselect.css">
+		<script src="<?php echo base_url(); ?>asset/multiselect/src/jquery.multiselect.min.js"></script>
+		<script>
+			jQuery(document).ready(function(){
+				$("select#budget").multiselect({
+					selectedList: 1,
+					noneSelectedText: 'Any Budget',
+					header: false
+				});
+				
+				$("select#bedroom").multiselect({
+					selectedList: 1,
+					noneSelectedText: 'Any Bedroom',
+					header: false
+				});
+			});
+		</script>
+		<?php } ?>
 </body>
 
 </html>
