@@ -154,7 +154,7 @@ class Inquiries extends CI_Controller{
 		$q_page = $this->db->query($sql);
 		$table_header='Inquiry Date,Client,Plan,Plan Move in,Assigned To,Last Status';
 		$field='inquiry_date,client_name,plan,plan_move_in,agent,post_status';
-		$data['page']=$this->myci->page2($q_page->num_rows(),$this->limit,$this->controller,4);
+		$data['page']=$this->myci->page2(2,$this->limit,$this->controller,3);
 		$data['show']='data';
 		$data['tabel']=$this->myci->table_inquiry($query,$field,$table_header,$this->controller,$this->primary,true);
 		$this->myci->display_adm('theme/'.$this->view,$data);
