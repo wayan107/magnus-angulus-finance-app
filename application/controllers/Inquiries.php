@@ -127,7 +127,7 @@ class Inquiries extends CI_Controller{
 	private function _view($offset=0){
 		$data['add']=($this->myci->user_role=='sales_manager') ? anchor($this->controller.'/add','Add New',array('class'=>'btn btn-primary')) : '';
 		$data['filter_class'] = ($this->myci->user_role=='sales_manager') ? 'pull-right' : '';
-		$field='inquiry_date,(if(plan=0,"Rent","Buy")) as plan,plan_move_in,ag.name as agent,post_status';
+		$field='inquiry_date,(if(plan=0,"Rent","Buy")) as plan,plan_move_in,ag.name as agent,post_status,ag.id as agent_id';
 		$data['_page_title'] = $this->page_name;
 		$inquiry_status = $this->config->item('inquiry');
 		$where='where post_status IN ("'.implode('","',$inquiry_status).'") and 1=1';

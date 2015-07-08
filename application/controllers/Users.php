@@ -200,7 +200,7 @@
 		}
 		
 		public function getagent(){
-			$q = $this->db->query('SELECT id,name from fn_agent where occupation="Sales Agent"');
+			$q = $this->db->query('SELECT id,name from fn_agent where occupation="Sales Agent" or occupation="Sales manager"');
 			$agents[''] = 'Choose Agent';
 			foreach($q->result_array() as $qa){
 				$agents[$qa['id']] = $qa['name'];

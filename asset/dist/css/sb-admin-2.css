@@ -658,3 +658,20 @@ ul#area-list li {
 }
 
 #casebox,#case,#dealdatebox{display:none;}
+td.Hot.Prospect {
+  background-color: orange;
+  color: #FAFAFA;
+}
+
+td.Inspection {
+  background-color: yellow;
+}
+
+td.Deal {
+  background-color: green;
+  color: #fafafa;
+}
+td.Lost {
+  background-color: red;
+  color: #fafafa;
+}

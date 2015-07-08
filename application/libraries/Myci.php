@@ -427,10 +427,14 @@ class Myci{
 				$item_row[0]=$table_row; 
 				$table_row++;
 				for($i=0;$i<$jumField;$i++){
-					
+					if($fields[$i]=='post_status'){
+						$tcell = array('data'=>$dts[$fields[$i]],'class'=>$dts[$fields[$i]]);
+						$item_row[$i+1]=$tcell;
+					}else
 					$item_row[$i+1]=$dts[$fields[$i]];
 					
 				}
+				
 				if($this->user_role=='sales_manager'){
 					$buttons=array(
 						anchor($controller.'/assign/'.$dts[$primary],'<i class="fa fa-share-square"></i>',array('class'=>'setbutton','title'=>'Label This inquiry to sales agent')),
@@ -441,7 +445,15 @@ class Myci{
 					$buttons=array();
 				}
 				
-				if($this->user_role=='sales_manager' || $this->user_role=='sales'){
+				$show_this=false;
+				$current_agent = $this->get_related_account($this->get_user_logged_in());
+				if($current_agent && !empty($dts['agent_id'])){
+					if($current_agent == $dts['agent_id']){
+						$show_this = true;
+					}
+				}
+				
+				if(($this->user_role=='sales_manager' || $this->user_role=='sales') && $show_this){
 					array_unshift($buttons,anchor($controller.'/setstatus/'.$dts[$primary],'<i class="fa fa-question-circle"></i>',array('class'=>'setbutton','title'=>'Set Inquiry Status')));
 				}
 				
@@ -930,6 +942,18 @@ class Myci{
 		if($q->num_rows()>0){
 			$q = $q->row();
 			return $q->id;
+		}
+		
+		return false;
+	}
+	
+	function get_related_account($uid){
+		$q = $this->ci->db->query(
+								'SELECT relatedaccount from fn_users where username="'.$uid.'"'
+							);
+		if($q->num_rows()>0){
+			$q = $q->row();
+			return $q->relatedaccount;
 		}
 		
 		return false;
