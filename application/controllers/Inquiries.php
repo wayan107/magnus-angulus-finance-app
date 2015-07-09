@@ -148,8 +148,9 @@ class Inquiries extends CI_Controller{
 								inner join fn_client c on c.id=fn_deals.client
 								left join fn_agent ag on ag.id=fn_deals.sales_agent
 								$where";
+								
 		$query=$this->db->query($sql."
-								order by inquiry_date DESC
+								order by inquiry_date DESC,fn_deals.id DESC
 								limit $offset , ".$this->limit);
 		$q_page = $this->db->query($sql);
 		$table_header='Inquiry Date,Client,Plan,Plan Move in,Assigned To,Last Status';
@@ -177,9 +178,9 @@ class Inquiries extends CI_Controller{
 	
 	public function get_budget(){
 		if($_POST['type']=='0'){
-			echo form_dropdown('budget',$this->rental_budget,'','class="form-control" required');
+			echo form_dropdown('budget[]',$this->rental_budget,'','class="form-control" id="budget" multiple="multiple"');
 		}else{
-			echo form_dropdown('budget',$this->sale_budget,'','class="form-control" required');
+			echo form_dropdown('budget[]',$this->sale_budget,'','class="form-control" id="budget" multiple="multiple"');
 		}
 	}
 	
@@ -247,25 +248,18 @@ class Inquiries extends CI_Controller{
 							');
 		if($query->num_rows()>0){
 			$q = $query->row();
-			$to = $q->agent_email;
-			$subject = 'New Inquiry';
-			$headers  = 'MIME-Version: 1.0' . "\r\n";
-			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-			// Additional headers
-			$headers .= 'From: '.$q->client.' <'.$q->client_email.'>' . "\r\n";
-			$headers .= 'Cc: info@balilongtermrentals.com' . "\r\n";
 			$msg = '<p>Name : '.$q->client.'</p>';
 			
 			$interested_villas = unserialize($q->interested_villa);
 			if(!empty($interested_villas['villacode'])){
-				$villalink='';
-				$index=0;
-				foreach($interested_villas['villacode'] as $code){
-					if(!empty($interested_villas['villalink'])){
-						$villalink .= '<a href="'.$interested_villas['villalink'][$index].'">'.$code.'</a>, ';
-						$index++;
-					}else
-						$villalink .= $code.', ';
+				if(!empty($interested_villas['villalink'])){
+					$villalink='';
+					$index=0;
+					foreach($interested_villas['villalink'] as $link){
+						$villalink .= '<a href="'.$link.'" target="_blank">'.$interested_villas['villacode'][$index].'</a>, ';
+					}
+				}else{
+					$villalink = implode(', ',$interested_villas['villacode']);
 				}
 				
 				$msg .= '<p>Interested Villa : '.substr($villalink,0,strlen($villalink)-2).'</p>';
@@ -282,39 +276,39 @@ class Inquiries extends CI_Controller{
 			if($q->plan=='0'){
 				$additional_msg .= 'Rent</p>';
 				$budgets_list = $this->rental_budget;
-				
-				if(!empty($q->living)){
-					$additional_msg .= '<p>Living : ';
-					switch ($q->living){
-						case '1'	: $additional_msg .= 'Open Living';
-						break;
-						
-						case '2'	: $additional_msg .= 'Closed Living';
-						break;
-						
-						default		: $additional_msg .= 'Any Living';
-						break;
-					}
-					$additional_msg .= '</p>';
+				$cc = 'info@balilongtermrentals.com';
+				//if(!empty($q->living)){
+				$additional_msg .= '<p>Living : ';
+				switch ($q->living){
+					case '1'	: $additional_msg .= 'Open Living';
+					break;
+					
+					case '2'	: $additional_msg .= 'Closed Living';
+					break;
+					
+					default		: $additional_msg .= 'Any Living';
+					break;
 				}
+				$additional_msg .= '</p>';
+				//}
 			}else{
 				$additional_msg .= 'Buy</p>';
 				$budgets_list = $this->sale_budget;
-				
-				if(!empty($q->hold)){
-					$additional_msg .= '<p>Hold : ';
-					switch ($q->hold){
-						case '1'	: $additional_msg .= 'Freehold';
-						break;
-						
-						case '2'	: $additional_msg .= 'Leasehold';
-						break;
-						
-						default		: $additional_msg .= 'Any Hold';
-						break;
-					}
-					$additional_msg .= '</p>';
+				$cc = 'info@balivillasales.com';
+				//if(!empty($q->hold)){
+				$additional_msg .= '<p>Hold : ';
+				switch ($q->hold){
+					case '1'	: $additional_msg .= 'Freehold';
+					break;
+					
+					case '2'	: $additional_msg .= 'Leasehold';
+					break;
+					
+					default		: $additional_msg .= 'Any Hold';
+					break;
 				}
+				$additional_msg .= '</p>';
+				//}
 			}
 			
 			if(!empty($q->budget)){
@@ -327,23 +321,23 @@ class Inquiries extends CI_Controller{
 			}
 			
 			if(!empty($q->bedroom)) $additional_msg .= '<p>Bedrooms : '.$q->bedroom.'</p>';
-			if(!empty($q->furnishing)){
-				$additional_msg .= '<p>Furnishing : ';
-				switch ($q->furnishing){
-					case '1'	: $additional_msg .= 'Furnished';
-					break;
-					
-					case '2'	: $additional_msg .= 'Semi-Furnished';
-					break;
-					
-					case '3'	: $additional_msg .= 'Unfurnished';
-					break;
-					
-					default		: $additional_msg .= 'Any Furnishing';
-					break;
-				}
-				$additional_msg .= '</p>';
+			//if(!empty($q->furnishing)){
+			$additional_msg .= '<p>Furnishing : ';
+			switch ($q->furnishing){
+				case '1'	: $additional_msg .= 'Furnished';
+				break;
+				
+				case '2'	: $additional_msg .= 'Semi-Furnished';
+				break;
+				
+				case '3'	: $additional_msg .= 'Unfurnished';
+				break;
+				
+				default		: $additional_msg .= 'Any Furnishing';
+				break;
 			}
+			$additional_msg .= '</p>';
+			//}
 			
 			$preferable_areas = $this->area->get_area_basedon_inquiry($id,true);
 			if(!empty($preferable_areas)) $additional_msg .= '<p>Preferable Areas : '.implode(', ',$preferable_areas).'</p>';
@@ -356,6 +350,13 @@ class Inquiries extends CI_Controller{
 			}
 			
 			// Mail it
+			$to = $q->agent_email;
+			$subject = 'New Inquiry';
+			$headers  = 'MIME-Version: 1.0' . "\r\n";
+			$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+			// Additional headers
+			$headers .= 'From: '.$q->client.' <'.$q->client_email.'>' . "\r\n";
+			$headers .= 'Cc: '.$cc. "\r\n";
 			$status = mail($to, $subject, $msg, $headers);
 		}
 		return $status;
@@ -364,7 +365,8 @@ class Inquiries extends CI_Controller{
 	public function insertcurl(){
 		$data=$this->myci->post($this->textbox);
 		
-		$data['inquiry_date'] = date('Y-m-d');//$date->format('Y-m-d');
+		$inquiry_date = new DateTime('now',new DateTimeZone('Asia/Makassar'));
+		$data['inquiry_date'] = $inquiry_date->format('Y-m-d');//date('Y-m-d');//$date->format('Y-m-d');
 		
 		$date = new DateTime($data['plan_move_in'].' 00:00:00');
 		$data['plan_move_in'] = $date->format('Y-m-d');

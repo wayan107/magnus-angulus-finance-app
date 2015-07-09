@@ -75,7 +75,7 @@ if($show=='form'){
 						<label>Furnishing: </label>
 						<?php
 							$opts = array(
-										''	=> 'Choose',
+										'0'	=> 'Any Furnishing',
 										'1'	=> 'Furnished',
 										'2'	=> 'Semi-Furnished',
 										'3'	=> 'Unfurnished'
@@ -84,15 +84,25 @@ if($show=='form'){
 						?>
 					</div>
 					<div class="col-sm-4">
+						<?php if($plan=='1'){ ?>
+						<label>Hold: </label>
+						<?php
+							$opts = array(
+										'0'	=> 'Any Hold',
+										'1'	=> 'Freehold',
+										'2'	=> 'Leasehold'
+									);
+							echo form_dropdown('living',$opts,$hold,'class="form-control"');
+						}else{ ?>
 						<label>Living: </label>
 						<?php
 							$opts = array(
-										''	=> 'Choose',
+										'0'	=> 'Any Living',
 										'1'	=> 'Open Living',
 										'2'	=> 'Close Living'
 									);
 							echo form_dropdown('living',$opts,$living,'class="form-control"');
-						?>
+						}?>
 					</div>
 					
 					<div class="col-sm-4">

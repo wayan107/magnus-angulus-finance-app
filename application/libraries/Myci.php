@@ -438,7 +438,7 @@ class Myci{
 				if($this->user_role=='sales_manager'){
 					$buttons=array(
 						anchor($controller.'/assign/'.$dts[$primary],'<i class="fa fa-share-square"></i>',array('class'=>'setbutton','title'=>'Label This inquiry to sales agent')),
-						anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit','title'=>'Update')),
+						//anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit','title'=>'Update')),
 						anchor($controller.'/delete/'.$dts[$primary],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')",'title'=>'Delete'))
 					);
 				}else{

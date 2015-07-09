@@ -6,6 +6,11 @@ $(function() {
 			data	: {'type':$("#plan").val()},
 			success	: function(e){
 				$("#budget").html(e);
+				$("select#budget").multiselect({
+					selectedList: 1,
+					noneSelectedText: 'Any Budget',
+					header: false
+				});
 			}
 		});
 		
