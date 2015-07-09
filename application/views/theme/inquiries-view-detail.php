@@ -63,18 +63,31 @@
 								}; ?></p>
 			</div>
 			<div class="col-sm-2">
-				<h3>Living</h3>
-				<p><?php //echo ($dt['living']=='1') ? 'Open Living' : 'Close living';
-						switch ($dt['living']){
-							case '1'	: echo 'Open Living';
-							break;
-							
-							case '2'	: echo 'Closed Living';
-							break;
-							
-							default		: echo 'Any Living';
-							break;
-						};
+				<h3><?php echo ($dt['plan']=='0') ? 'Living' : 'Hold'; ?></h3>
+				<p><?php
+						if($dt['plan']=='0'){
+							switch ($dt['living']){
+								case '1'	: echo 'Open Living';
+								break;
+								
+								case '2'	: echo 'Closed Living';
+								break;
+								
+								default		: echo 'Any Living';
+								break;
+							};
+						}else{
+							switch ($dt['hold']){
+								case '1'	: echo 'Freehold';
+								break;
+								
+								case '2'	: echo 'Leasehold';
+								break;
+								
+								default		: echo 'Any Hold';
+								break;
+							};
+						}
 				?></p>
 			</div>
 			<div class="col-sm-2">
@@ -92,6 +105,25 @@
 				<p><?php echo $dt['lost_case']; ?></p>
 			</div>
 			<?php } ?>
+			
+			<div class="col-sm-4">
+				<h3>Interested Villas</h3>
+				<p>
+					<?php
+					$villas = unserialize($dt['interested_villa']);
+					if(!empty($villas['villalink'])){
+						$index=0;
+						$vlink ='';
+						foreach($villas['villalink'] as $link){
+							$vlink .= '<a href="'.$link.'" target="_blank">'.$villas['villacode'][$index].'</a>, ';
+						}
+						echo substr($vlink,0,strlen($vlink)-2);
+					}else{
+						echo implode(', ',$villas['villacode']);
+					}
+					?>
+				</p>
+			</div>
 			
 			<div class="col-sm-4">
 				<h3>Preferable Areas</h3>

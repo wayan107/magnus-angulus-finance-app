@@ -8,7 +8,7 @@ class Inquiries extends CI_Controller{
 		private $controller='inquiries';
 		private $view='inquiries';
 		private $textbox=array('id','inquiry_date','client','budget','plan','plan_move_in','bedroom',
-								'furnishing','living','interested_villa','inquiry_msg');
+								'furnishing','living','interested_villa','inquiry_msg','hold');
 		private $rental_budget, $sale_budget;
 		
 	public function __construct(){
@@ -163,7 +163,7 @@ class Inquiries extends CI_Controller{
 	public function viewdetail($id){
 		$data['query']=$this->db->query('select d.inquiry_date,d.budget,d.plan,d.plan_move_in,d.bedroom,
 											d.furnishing,d.living,c.name as client_name,ag.name as agent,
-											d.post_status,d.lost_case
+											d.post_status,d.lost_case,d.hold,d.interested_villa
 											
 											from fn_deals d
 											inner join fn_client c on c.id=d.client
@@ -238,7 +238,7 @@ class Inquiries extends CI_Controller{
 		$query = $this->db->query('
 								SELECT ag.email as agent_email,cl.email as client_email,cl.name as client,
 										d.interested_villa, d.inquiry_msg, d.plan_move_in, d.bedroom, d.furnishing,
-										d.living, d.plan,d.budget
+										d.living, d.plan,d.budget,d.hold
 								FROM fn_deals d
 								INNER JOIN fn_agent ag on ag.id=d.sales_agent
 								INNER JOIN fn_client cl on cl.id=d.client
@@ -281,9 +281,39 @@ class Inquiries extends CI_Controller{
 			if($q->plan=='0'){
 				$additional_msg .= 'Rent</p>';
 				$budgets_list = $this->rental_budget;
+				
+				if(!empty($q->living)){
+					$additional_msg .= '<p>Living : ';
+					switch ($q->living){
+						case '1'	: $additional_msg .= 'Open Living';
+						break;
+						
+						case '2'	: $additional_msg .= 'Closed Living';
+						break;
+						
+						default		: $additional_msg .= 'Any Living';
+						break;
+					}
+					$additional_msg .= '</p>';
+				}
 			}else{
 				$additional_msg .= 'Buy</p>';
 				$budgets_list = $this->sale_budget;
+				
+				if(!empty($q->hold)){
+					$additional_msg .= '<p>Hold : ';
+					switch ($q->hold){
+						case '1'	: $additional_msg .= 'Freehold';
+						break;
+						
+						case '2'	: $additional_msg .= 'Leasehold';
+						break;
+						
+						default		: $additional_msg .= 'Any Hold';
+						break;
+					}
+					$additional_msg .= '</p>';
+				}
 			}
 			
 			if(!empty($q->budget)){
@@ -309,21 +339,6 @@ class Inquiries extends CI_Controller{
 					break;
 					
 					default		: $additional_msg .= 'Any Furnishing';
-					break;
-				}
-				$additional_msg .= '</p>';
-			}
-			
-			if(!empty($q->living)){
-				$additional_msg .= '<p>Living : ';
-				switch ($q->living){
-					case '1'	: $additional_msg .= 'Open Living';
-					break;
-					
-					case '2'	: $additional_msg .= 'Closed Living';
-					break;
-					
-					default		: $additional_msg .= 'Any Living';
 					break;
 				}
 				$additional_msg .= '</p>';
