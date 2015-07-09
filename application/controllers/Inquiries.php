@@ -19,18 +19,18 @@ class Inquiries extends CI_Controller{
 		$this->config->load('inquiry_config');
 		
 		$this->rental_budget = array(
-									'1'	=> 'IDR 0 - IDR 100 M',
-									'2'	=> 'IDR 100 - IDR 200 M',
-									'3'	=> 'IDR 200 - IDR 300 M',
-									'4'	=> 'IDR 300+ M'
+									'1'	=> 'IDR 0 - 100M',
+									'2'	=> 'IDR 100M - 200M',
+									'3'	=> 'IDR 200M - 300M',
+									'4'	=> 'IDR 300M+'
 								);
 		
 		$this->sale_budget = array(
-									'1'	=> 'USD 0 - USD 250 K',
-									'2'	=> 'USD 250 - USD 500 K',
-									'3'	=> 'USD 500 - USD 750 K',
-									'4'	=> 'USD 750 - USD 1000 K',
-									'5'	=> 'USD 1000+ K'
+									'1'	=> 'USD 0 - 250K',
+									'2'	=> 'USD 250K - 500K',
+									'3'	=> 'USD 500K - 750K',
+									'4'	=> 'USD 750K - 1000K',
+									'5'	=> 'USD 1000K+'
 								);
 	}
 	
@@ -210,8 +210,8 @@ class Inquiries extends CI_Controller{
 	public function saveassign(){
 		$data['sales_agent'] = $_POST['agent'];
 		$this->db->update('deals',$data,array('id'=>$_POST['id']));
-		$this->_sendemaillabel($_POST['id']);
-		echo 1;
+		$email_sent = $this->_sendemaillabel($_POST['id']);
+		echo $email_sent;
 	}
 	
 	public function setstatus($id){
@@ -235,6 +235,7 @@ class Inquiries extends CI_Controller{
 	}
 	
 	private function _sendemaillabel($id){
+		$status = false;
 		$query = $this->db->query('
 								SELECT ag.email as agent_email,cl.email as client_email,cl.name as client,
 										d.interested_villa, d.inquiry_msg, d.plan_move_in, d.bedroom, d.furnishing,
@@ -355,8 +356,9 @@ class Inquiries extends CI_Controller{
 			}
 			
 			// Mail it
-			mail($to, $subject, $msg, $headers);
+			$status = mail($to, $subject, $msg, $headers);
 		}
+		return $status;
 	}
 	
 	public function insertcurl(){
