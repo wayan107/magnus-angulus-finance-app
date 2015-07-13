@@ -75,13 +75,15 @@
                             </ul>
                             <!-- /.nav-second-level -->
                         </li>
-						<?php } ?>
+						<?php }
 						
+						if(in_array($userrole,unserialize(PAYMENTPLAN))){ ?>
 						<li>
 							<a href="<?php echo base_url(); ?>paymentplan/"><i class="fa fa-money fa-fw"></i>Payment Plan</a>
 						</li>
 						
-						<?php if(in_array($userrole,unserialize(REPORTS))){ ?>
+						<?php }
+						if(in_array($userrole,unserialize(REPORTS))){ ?>
 						 <li>
                             <a href="#"><i class="fa fa-files-o fa-fw"></i> Reports<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">

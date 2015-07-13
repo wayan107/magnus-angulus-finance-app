@@ -2,6 +2,15 @@ $(function() {
     $("#plan").change(function(){
 		$.ajax({
 			type	: 'POST',
+			url		: baseurl+'inquiries/get_hold_living',
+			data	: {'type':$("#plan").val()},
+			success	: function(e){
+				$("#hold-living").html(e);
+			}
+		});
+		
+		$.ajax({
+			type	: 'POST',
 			url		: baseurl+'inquiries/get_budget',
 			data	: {'type':$("#plan").val()},
 			success	: function(e){
@@ -13,6 +22,8 @@ $(function() {
 				});
 			}
 		});
+
+		
 		
 	});
 	
@@ -87,4 +98,12 @@ $(function() {
 			});
 		});
 	}
+	
+	jQuery('#filter-status').change(function(){
+		var text = 'Inquiry';
+		if(jQuery(this).val()=='Deal'){
+			text = 'Deal';
+		}
+		jQuery('#date-filter-label').html(text);
+	});
 });

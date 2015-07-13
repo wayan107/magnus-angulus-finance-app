@@ -165,12 +165,12 @@
 			$query_paging = $this->db->query('SELECT ac.id
 							from fn_agent_commission ac
 							inner join fn_deals d on ac.deal_id=d.id
-							inner join fn_agent ag on ag.id=ac.agent
+							left join fn_agent ag on ag.id=ac.agent
 							left join fn_payment_plan pp on (pp.deal_id=ac.deal_id and ac.pp_ref=pp.ref_number and pp.type="fee")
 							'.$where.$agent.'
 							group by ac.id
 						');
-						
+			
 			$total_page=$query_paging->num_rows();
 			$table_header='Deal Date,Villa Code,Contract Number,Agent,Commission';
 			$field='deal_date,villa_code,contract_number,agent,comm_amount';

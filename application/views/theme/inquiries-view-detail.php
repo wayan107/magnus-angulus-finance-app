@@ -110,16 +110,18 @@
 				<h3>Interested Villas</h3>
 				<p>
 					<?php
-					$villas = unserialize($dt['interested_villa']);
-					if(!empty($villas['villalink'])){
-						$index=0;
-						$vlink ='';
-						foreach($villas['villalink'] as $link){
-							$vlink .= '<a href="'.$link.'" target="_blank">'.$villas['villacode'][$index].'</a>, ';
+					if(!empty($dt['interested_villa'])){
+						$villas = unserialize($dt['interested_villa']);
+						if(!empty($villas['villalink'])){
+							$index=0;
+							$vlink ='';
+							foreach($villas['villalink'] as $link){
+								$vlink .= '<a href="'.$link.'" target="_blank">'.$villas['villacode'][$index].'</a>, ';
+							}
+							echo substr($vlink,0,strlen($vlink)-2);
+						}else{
+							echo implode(', ',$villas['villacode']);
 						}
-						echo substr($vlink,0,strlen($vlink)-2);
-					}else{
-						echo implode(', ',$villas['villacode']);
 					}
 					?>
 				</p>

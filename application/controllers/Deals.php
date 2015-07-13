@@ -180,7 +180,13 @@ class Deals extends CI_Controller{
 								limit $offset , ".$this->limit);
 		$table_header='Deal Date,Villa Code,Contract Number,Client,Deal Amount';
 		$field='deal_date,villa_code,contract_number,client_name,deal_amount';
-		$data['page']=$this->myci->page($this->tabel,$this->limit,$this->controller,3);
+		
+		$q_page = $this->db->query("select count(fn_deals.id) as total_rows
+								from ".$this->tabel."
+								inner join fn_client c on c.id=fn_deals.client
+								$where");
+		$q_page = $q_page->row();
+		$data['page']=$this->myci->page2($q_page->total_rows,$this->limit,$this->controller,3);
 		$data['show']='data';
 		$data['tabel']=$this->myci->table_admin($query,$field,$table_header,$this->controller,$this->primary,true);
 		$this->myci->display_adm('theme/'.$this->view,$data);

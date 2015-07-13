@@ -43,7 +43,7 @@ if($show=='form'){
 					</div>
 					<div class="col-sm-4">
 						<label>Plan Move in: </label>
-						<input type="text" required class="form-control datepicker" name="plan_move_in" value="<?php echo $plan_move_in; ?>">
+						<input type="text" class="form-control datepicker" name="plan_move_in" value="<?php echo $plan_move_in; ?>">
 					</div>
 					<div class="col-sm-4">
 						<label>Bedroom: </label>
@@ -84,25 +84,28 @@ if($show=='form'){
 						?>
 					</div>
 					<div class="col-sm-4">
-						<?php if($plan=='1'){ ?>
-						<label>Hold: </label>
-						<?php
-							$opts = array(
-										'0'	=> 'Any Hold',
-										'1'	=> 'Freehold',
-										'2'	=> 'Leasehold'
-									);
-							echo form_dropdown('living',$opts,$hold,'class="form-control"');
-						}else{ ?>
-						<label>Living: </label>
-						<?php
-							$opts = array(
-										'0'	=> 'Any Living',
-										'1'	=> 'Open Living',
-										'2'	=> 'Close Living'
-									);
-							echo form_dropdown('living',$opts,$living,'class="form-control"');
-						}?>
+						<span id="hold-living">
+							<?php if($plan=='1'){ ?>
+							<label>Hold: </label>
+							<?php
+								$opts = array(
+											'0'	=> 'Any Hold',
+											'1'	=> 'Freehold',
+											'2'	=> 'Leasehold'
+										);
+								echo form_dropdown('living',$opts,$hold,'class="form-control"');
+							?>
+							<?php }else{ ?>
+							<label>Living: </label>
+							<?php
+								$opts = array(
+											'0'	=> 'Any Living',
+											'1'	=> 'Open Living',
+											'2'	=> 'Close Living'
+										);
+								echo form_dropdown('living',$opts,$living,'class="form-control"');
+							}?>
+						</span>
 					</div>
 					
 					<div class="col-sm-4">
@@ -164,16 +167,21 @@ if($show=='form'){
 			<?php echo $add; ?>
 			<div class="<?php echo $filter_class; ?> filter">
 				<form method="post">
-				Inquiry Date From:
+				<span id="date-filter-label"><?php if (!empty($_POST['status']) && $_POST['status']=='Deal') echo 'Deal'; else echo 'Inquiry'; ?></span> Date From:
 				<input type="text" class="datepicker" name="date-start" value="<?php if (!empty($_POST['date-start'])) echo $_POST['date-start'];; ?>">
 				to
 				<input type="text" class="datepicker" name="date-end" value="<?php if(!empty($_POST['date-end'])) echo $_POST['date-end']; ?>">
 				<?php
-				$options=$this->dealsmodel->get_agent_dropdown('Sales Agent','Filter by Agent');
+				$options=$this->dealsmodel->get_agent_dropdown('Sales Agent','All Agent');
 				$default=(!empty($_POST['agent'])) ? $_POST['agent'] : '';
 				echo form_dropdown('agent',$options,$default);
 				
-				$search=(!empty($_POST['search'])) ? $_POST['search'] : '';
+				$options = $this->config->item('status_dropdown_list');
+				array_unshift($options,'All Status');
+				$default=(!empty($_POST['status'])) ? $_POST['status'] : '';
+				echo form_dropdown('status',$options,$default,'id="filter-status"');
+				
+				//$search=(!empty($_POST['search'])) ? $_POST['search'] : '';
 				?>
 				<input type="submit" class="btn btn-primary" name="filter" value="Submit"/>
 				</form>
@@ -191,6 +199,15 @@ if($show=='form'){
 			</div>
 		</div>
 		<!-- /.panel-body -->
+		<div class="panel-footer">
+			<?php if(!empty($_POST['filter']) && $this->myci->user_role=='sales_manager'){ ?>
+			<div class="row text-right">
+				<div class="col-sm-12">
+					<a href="<?php echo base_url(); ?>inquiries/export/<?php echo $export_params; ?>" class="btn btn-primary">Export to Excel</a>
+				</div>
+			</div>
+			<?php } ?>
+		</div>
 	</div>
 	<?php
 }

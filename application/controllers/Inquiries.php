@@ -62,10 +62,16 @@ class Inquiries extends CI_Controller{
 		$date = new DateTime($data['inquiry_date'].' 00:00:00');
 		$data['inquiry_date'] = $date->format('Y-m-d');
 		
+		if($data['plan']==1){
+			$data['living'] = 0;
+		}else{
+			$data['hold'] = 0;
+		}
+		
 		$date = new DateTime($data['plan_move_in'].' 00:00:00');
 		$data['plan_move_in'] = $date->format('Y-m-d');
-		$data['budget'] = implode(',',$data['budget']);
-		$data['bedroom'] = implode(',',$data['bedroom']);
+		$data['budget'] = (!empty($data['budget'])) ? implode(',',$data['budget']) : '';
+		$data['bedroom'] = (!empty($data['bedroom'])) ? implode(',',$data['bedroom']) : '';
 		$data['post_status'] = 'Prospect';
 		$data['interested_villa'] = $this->_format_interested_villa();
 		$deal_id = $this->mydb->insert($this->tabel,$data);
@@ -130,34 +136,54 @@ class Inquiries extends CI_Controller{
 		$field='inquiry_date,(if(plan=0,"Rent","Buy")) as plan,plan_move_in,ag.name as agent,post_status,ag.id as agent_id';
 		$data['_page_title'] = $this->page_name;
 		$inquiry_status = $this->config->item('inquiry');
-		$where='where post_status IN ("'.implode('","',$inquiry_status).'") and 1=1';
+		//post_status IN ("'.implode('","',$inquiry_status).'")
+		$where='where 1=1';
+		$export_params ='?go=1';
+		
 		if(!empty($_POST['filter'])){
 			if($_POST['agent']){
 				$where .= " and sales_agent='".$_POST['agent']."'";
+				$export_params .= '&agent='.$_POST['agent'];
 			}
 			
 			if($_POST['date-start'] && $_POST['date-end']){
 				$date_start=new DateTime($_POST['date-start'] .' 00:00:00');
 				$date_end=new DateTime($_POST['date-end'] .' 00:00:00');
 				$where .=' and inquiry_date between CAST("'.$date_start->format('Y-m-d').'" as DATE) and CAST("'.$date_end->format('Y-m-d').'" as DATE)';
+				$export_params .= '&datestart='.$date_start->format('Y-m-d').'&dateend='.$date_end->format('Y-m-d');
+			}
+			
+			if(!empty($_POST['status'])){
+				if($this->input->post('status')=='Deal'){
+					$where .= ' and (post_status="'.$this->input->post('status').'" or post_status="Finalized Deal")';
+					$export_params .= '&post_status='.$this->input->post('status');
+				}else{
+					$where .= ' and post_status="'.$this->input->post('status').'"';
+					$export_params .= '&post_status='.$this->input->post('status');
+				}
 			}
 		}
 		
-		$sql = "select fn_deals.id,$field,c.name as client_name
-								from ".$this->tabel."
-								inner join fn_client c on c.id=fn_deals.client
-								left join fn_agent ag on ag.id=fn_deals.sales_agent
-								$where";
+		$select = "select fn_deals.id,$field,c.name as client_name";
+		$sql = " from ".$this->tabel."
+				inner join fn_client c on c.id=fn_deals.client
+				left join fn_agent ag on ag.id=fn_deals.sales_agent
+				$where";
 								
-		$query=$this->db->query($sql."
+		$query=$this->db->query($select.$sql."
 								order by inquiry_date DESC,fn_deals.id DESC
 								limit $offset , ".$this->limit);
-		$q_page = $this->db->query($sql);
+								
+		$q_page = $this->db->query('select count(fn_deals.id) as total_rows'.$sql);
+		$q_page = $q_page->row();
+		
 		$table_header='Inquiry Date,Client,Plan,Plan Move in,Assigned To,Last Status';
 		$field='inquiry_date,client_name,plan,plan_move_in,agent,post_status';
-		$data['page']=$this->myci->page2(2,$this->limit,$this->controller,3);
+		
+		$data['page']=$this->myci->page2($q_page->total_rows,$this->limit,$this->controller,3);
 		$data['show']='data';
 		$data['tabel']=$this->myci->table_inquiry($query,$field,$table_header,$this->controller,$this->primary,true);
+		$data['export_params'] = $export_params;
 		$this->myci->display_adm('theme/'.$this->view,$data);
 	}
 	
@@ -181,6 +207,26 @@ class Inquiries extends CI_Controller{
 			echo form_dropdown('budget[]',$this->rental_budget,'','class="form-control" id="budget" multiple="multiple"');
 		}else{
 			echo form_dropdown('budget[]',$this->sale_budget,'','class="form-control" id="budget" multiple="multiple"');
+		}
+	}
+	
+	public function get_hold_living(){
+		if($_POST['type']=='0'){
+			echo '<label>Living: </label>';
+			$opts = array(
+						'0'	=> 'Any Living',
+						'1'	=> 'Open Living',
+						'2'	=> 'Close Living'
+					);
+			echo form_dropdown('living',$opts,'','class="form-control"');
+		}else{
+			echo '<label>Hold: </label>';
+			$opts = array(
+						'0'	=> 'Any Hold',
+						'1'	=> 'Freehold',
+						'2'	=> 'Leasehold'
+					);
+			echo form_dropdown('hold',$opts,'','class="form-control"');
 		}
 	}
 	
@@ -415,6 +461,133 @@ class Inquiries extends CI_Controller{
 		}else{
 			$this->db->insert('client',$data);
 			return $this->db->insert_id();
+		}
+	}
+	
+	public function export(){
+		$where = ' WHERE 1=1';
+		$header = 'Sales Report';
+		
+		if(!empty($_GET['agent'])){
+			$where .= " and sales_agent='".$_GET['agent']."'";
+		}
+		
+		$date_field = 'inquiry_date';
+		if(!empty($_GET['post_status'])){
+			if($_GET['post_status']=='Deal'){
+				$where .= ' and (post_status="'.$_GET['post_status'].'" or post_status="Finalized Deal")';
+				$date_field = 'deal_date';
+			}else{
+				$where .= ' and post_status="'.$_GET['post_status'].'"';
+			}
+		}
+		
+		if(!empty($_GET['datestart']) && !empty($_GET['dateend'])){
+			$where .=' and '.$date_field.' between CAST("'.$_GET['datestart'].'" as DATE) and CAST("'.$_GET['dateend'].'" as DATE)';
+		}
+		
+		$filename = "Sales Report " . date('Y-m-d') . ".xls";
+		header("Content-Disposition: attachment; filename=\"$filename\"");
+		header("Content-Type: application/vnd.ms-excel");
+		
+		if(!empty($_GET['post_status']) && $_GET['post_status']=='Deal'){
+			$this->_export_deals($where);
+		}else{
+			$this->_export_inquiry($where);
+		}
+		
+		exit();
+	}
+	
+	private function _export_inquiry($where){
+		$sql = "select fn_deals.id,inquiry_date,plan,plan_move_in,ag.name as sales_agent,
+				post_status,budget,c.name as client_name
+				from ".$this->tabel."
+				inner join fn_client c on c.id=fn_deals.client
+				left join fn_agent ag on ag.id=fn_deals.sales_agent
+				$where
+				order by inquiry_date DESC, fn_deals.id DESC";
+		$query = $this->db->query($sql);
+		$no=1;
+		$tab = "\t";
+		$new_line="\r\n";
+		echo 'No'.$tab.'Inquiry Date'.$tab.'Client Name'.$tab.'Plan'.$tab.'Plan Move In'.$tab.'Budget'.$tab.'Preferable Areas'.$tab.'Status'.$tab.'Sales Agent'.$new_line;
+		foreach($query->result_array() as $q){
+			if($q['plan']=='0'){
+				$plan = 'Rent';
+				$budget_list = $this->rental_budget;
+			}else{
+				$plan = 'Buy';
+				$budget_list = $this->sale_budget;
+			}
+			
+			$areas = $this->area->get_area_basedon_inquiry($q['id'],true);
+			
+			$budgets = explode(',',$q['budget']);
+			$budget = '';
+			foreach($budgets as $b){
+				$budget .= $budget_list[$b].', ';
+			}
+			
+			echo $no . $tab.
+				$q['inquiry_date'] .$tab.
+				$q['client_name'] .$tab.
+				$plan .$tab.
+				$q['plan_move_in'] .$tab.
+				substr($budget,0,strlen($budget)-2) .$tab.
+				implode(', ',$areas) .$tab.
+				$q['post_status'] .$tab.
+				$q['sales_agent'];
+				
+				echo $new_line;
+			$no++;
+		}
+	}
+	
+	private function _export_deals($where){
+		$sql = "select fn_deals.id,deal_date,plan,plan_move_in,
+				agl.name as listing_agent,ag.name as sales_agent,
+				post_status,c.name as client_name,villa_code,
+				CONCAT(consult_fee_currency,' ',CAST(FORMAT(consult_fee,0) as CHAR)) as consult_fee,
+				CONCAT(deal_price_currency,CAST(FORMAT(deal_price,0) as CHAR)) as price,
+				GROUP_CONCAT(DISTINCT CONCAT(pp.currency,CAST(FORMAT(pp.amount,0) as CHAR)) ORDER BY pp.date ASC SEPARATOR ' ') as incomming_fee,
+				GROUP_CONCAT(pp.date ORDER BY pp.date ASC SEPARATOR ' ') as incomming_fee_date
+				
+				from ".$this->tabel."
+				left join fn_client c on c.id=fn_deals.client
+				left join fn_agent ag on ag.id=fn_deals.sales_agent
+				left join fn_agent agl on agl.id=fn_deals.listing_agent
+				left join fn_payment_plan pp on (pp.deal_id=fn_deals.id and pp.type='fee' and EXTRACT(MONTH FROM pp.date)='".date('m')."')
+				$where
+				GROUP BY fn_deals.id
+				order by deal_date DESC";
+		$query = $this->db->query($sql);
+		$no=1;
+		$tab = "\t";
+		$new_line="\r\n";
+		echo 'No'.$tab.'Deal Date'.$tab.'Client Name'.$tab.'Plan'.$tab.'Villa Code'.$tab.'Price'.$tab.'Consult Fee'.$tab.'Money that will in this month'.$tab.'Plan money in'.$tab.'Status'.$tab.'Sales Agent'.$tab.'Listing Agent'.$new_line;
+		foreach($query->result_array() as $q){
+			if($q['plan']=='0'){
+				$plan = 'Rent';
+			}else{
+				$plan = 'Buy';
+			}
+			
+			echo $no . $tab.
+				$q['deal_date'] .$tab.
+				$q['client_name'] .$tab.
+				$plan .$tab.
+				$q['villa_code'] .$tab.
+				$q['price'] .$tab.
+				$q['consult_fee'] .$tab.
+				$q['incomming_fee'] .$tab.
+				$q['incomming_fee_date'] .$tab.
+				$q['post_status'] .$tab.
+				$q['sales_agent'].$tab.
+				$q['listing_agent'].$tab;
+				
+				echo $new_line;
+			$no++;
 		}
 	}
 }

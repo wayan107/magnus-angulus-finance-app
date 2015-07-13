@@ -89,6 +89,7 @@ define('CURRENCY',serialize(array(''=>'Choose','IDR'=>'IDR','USD'=>'USD','EUR'=>
 
 //ACL data
 define('MASTERDATA',serialize(array('superadmin','admin')));
+define('PAYMENTPLAN',serialize(array('superadmin','admin')));
 define('FINDTHEMONEY',serialize(array('superadmin','admin')));
 define('USERS',serialize(array('superadmin')));
 define('REPORTS',serialize(array('superadmin','admin','sales_manager','sales')));

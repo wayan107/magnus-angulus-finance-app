@@ -7,6 +7,7 @@
 				<p>
 					<label>Choose Status</label>
 					<?php
+						array_unshift($status,'Choose');
 						echo form_dropdown('status',$status,'','id="status" class="form-control" required onclick="showdesc()"');
 					?>
 				</p>
