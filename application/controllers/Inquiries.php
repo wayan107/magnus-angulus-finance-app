@@ -136,12 +136,19 @@ class Inquiries extends CI_Controller{
 		$field='inquiry_date,(if(plan=0,"Rent","Buy")) as plan,plan_move_in,ag.name as agent,post_status,ag.id as agent_id';
 		$data['_page_title'] = $this->page_name;
 		$inquiry_status = $this->config->item('inquiry');
-		//post_status IN ("'.implode('","',$inquiry_status).'")
-		$where='where 1=1';
+		
+		$where='where 1=1 and inquiry_date<>"0000-00-00"';
 		$export_params ='?go=1';
 		
+		//limit the sales agent view
+		if($this->myci->user_role=='sales'){
+			$q = $this->db->query('SELECT relatedaccount from fn_users where username="'.$this->myci->get_user_logged_in().'"');
+			$q = $q->row();
+			$where .= ' and sales_agent="'.$q->relatedaccount.'"';
+		}
+			
 		if(!empty($_POST['filter'])){
-			if($_POST['agent']){
+			if(!empty($_POST['agent']) && $this->myci->user_role=='sales_manager'){
 				$where .= " and sales_agent='".$_POST['agent']."'";
 				$export_params .= '&agent='.$_POST['agent'];
 			}

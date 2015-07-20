@@ -93,5 +93,5 @@ define('PAYMENTPLAN',serialize(array('superadmin','admin')));
 define('FINDTHEMONEY',serialize(array('superadmin','admin')));
 define('USERS',serialize(array('superadmin')));
 define('REPORTS',serialize(array('superadmin','admin','sales_manager','sales')));
-define('INQUIRIES',serialize(array('superadmin','sales_manager')));
+define('INQUIRIES',serialize(array('superadmin','sales_manager','sales')));
 define('DEALS',serialize(array('superadmin','admin')));

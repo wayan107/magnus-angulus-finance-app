@@ -172,10 +172,13 @@ if($show=='form'){
 				to
 				<input type="text" class="datepicker" name="date-end" value="<?php if(!empty($_POST['date-end'])) echo $_POST['date-end']; ?>">
 				<?php
-				$options=$this->dealsmodel->get_agent_dropdown('Sales Agent','All Agent');
-				$default=(!empty($_POST['agent'])) ? $_POST['agent'] : '';
-				echo form_dropdown('agent',$options,$default);
 				
+				if($this->myci->user_role=='sales_manager'){
+					$options=$this->dealsmodel->get_agent_dropdown('Sales Agent','All Agent');
+					$default=(!empty($_POST['agent'])) ? $_POST['agent'] : '';
+					echo form_dropdown('agent',$options,$default);
+				}
+					
 				$options = $this->config->item('status_dropdown_list');
 				array_unshift($options,'All Status');
 				$default=(!empty($_POST['status'])) ? $_POST['status'] : '';
