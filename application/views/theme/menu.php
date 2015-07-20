@@ -42,16 +42,18 @@
                         <li>
                             <a href="<?php echo base_url(); ?>" id="dashboard"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
+						<?php if(in_array($userrole,unserialize(INQUIRIES))){ ?>
 						<li>
                             <a href="<?php echo base_url() ?>inquiries/"><i class="fa fa-comment-o fa-fw"></i> Inquiries</a>
                             <!-- /.nav-second-level -->
                         </li>
+						<?php } if(in_array($userrole,unserialize(DEALS))){ ?>
                         <li>
                             <a href="<?php echo base_url() ?>deals/" id="deals"><i class="fa fa-dollar fa-fw"></i> Deals</a>
                             <!-- /.nav-second-level -->
                         </li>
 						
-                        <?php if(in_array($userrole,unserialize(MASTERDATA))){ ?>
+                        <?php } if(in_array($userrole,unserialize(MASTERDATA))){ ?>
 						<li>
                             <a href="#"><i class="fa fa-database fa-fw"></i> Master Data<span class="fa arrow"></span></a>
                             <ul class="nav nav-second-level">

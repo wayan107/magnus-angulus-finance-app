@@ -10,7 +10,7 @@ class Deals extends CI_Controller{
 		private $textbox=array('id','villa_code','client','owner','checkin_date','checkout_date','deal_date',
 								'deal_price','deal_price_currency','consult_fee','consult_fee_currency','area',
 								'deposit','deposit_currency','deposit_in','contract_number','sales_agent','listing_agent',
-								'date_created','remark','post_status');
+								'date_created','remark');
 		
 	public function __construct(){
 		parent::__construct();
@@ -59,6 +59,7 @@ class Deals extends CI_Controller{
 		$date=new DateTime($data['deposit_in'].' 00:00:00');
 		$data['deposit_in']=$date->format('Y-m-d');
 		
+		$data['post_status'] = 'Finalized Deal';
 		$deal_id = $this->mydb->insert($this->tabel,$data);
 		$this->_save_payment_plans($deal_id);
 		
@@ -128,6 +129,7 @@ class Deals extends CI_Controller{
 		
 		$date=new DateTime($data['deposit_in'].' 00:00:00');
 		$data['deposit_in']=$date->format('Y-m-d');
+		$data['post_status'] = 'Finalized Deal';
 		
 		$this->mydb->update($this->tabel,$data,$this->primary,$id);
 		$this->_save_payment_plans($id);
