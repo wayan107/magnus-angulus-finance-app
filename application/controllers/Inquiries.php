@@ -523,11 +523,16 @@ class Inquiries extends CI_Controller{
 			
 			$areas = $this->area->get_area_basedon_inquiry($q['id'],true);
 			
-			$budgets = explode(',',$q['budget']);
-			$budget = '';
-			foreach($budgets as $b){
-				$budget .= $budget_list[$b].', ';
+			if(!empty($q['budget'])){
+				$budgets = explode(',',$q['budget']);
+				$budget = '';
+				foreach($budgets as $b){
+					$budget .= $budget_list[$b].', ';
+				}
+			}else{
+				$budget = '';
 			}
+			
 			
 			echo $no . $tab.
 				$q['inquiry_date'] .$tab.
