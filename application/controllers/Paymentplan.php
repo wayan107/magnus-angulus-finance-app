@@ -45,6 +45,7 @@
 									from fn_payment_plan p
 									inner join fn_deals d on d.id=p.deal_id
 									'.$where.'
+									order by paid ASC, date ASC
 									limit '.$offset.' , '.$this->limit);
 
 			$query_paging=$this->db->query('select COUNT(p.id) as num
