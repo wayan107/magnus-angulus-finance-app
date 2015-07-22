@@ -323,7 +323,7 @@ jQuery(document).ready(function(){
 		var options = { 
 			target:   '#output',   // target element(s) to be updated with server response 
 			beforeSubmit:  beforeSubmit,  // pre-submit callback 
-			uploadProgress: OnProgress, //upload progress callback 
+			uploadProgress: OnProgress, //upload progress callback
 			resetForm: true        // reset the form after successful submit 
 		}; 
 		$(this).ajaxSubmit(options);            
@@ -380,9 +380,12 @@ jQuery(document).ready(function(){
 		$('#progressbar').width(percentComplete + '%') //update progressbar percent complete
 		$('#statustxt').html(percentComplete + '%'); //update status text
 		if(percentComplete>50)
-			{
-				$('#statustxt').css('color','#fafafa'); //change status text to white after 50%
-			}
+		{
+			$('#statustxt').css('color','#fafafa'); //change status text to white after 50%
+		}
+		if(percentComplete==100){
+			$('#output').html('<i class="fa fa-spinner fa-pulse"></i> Saving Data, please wait...');
+		}
 	}
 
 });
