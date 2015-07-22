@@ -587,7 +587,7 @@ a.circle-button:hover{
   background-size: cover;
 }
 
-.puput-bg .page-header, .puput-bg form .title{color:#fff;} /*.puput-bg form label, */
+.puput-bg .page-header, .puput-bg form .title,.puput-bg form label{color:#fff;}
 
 span.status-complete i {
   color: lime;
@@ -674,4 +674,29 @@ td.Deal {
 td.Lost {
   background-color: red;
   color: #fafafa;
+}
+
+div#progressbox {
+	display:none;
+  border: #0FA015 1px solid;
+  margin: 30px 0px;
+  border-radius: 4px;
+  text-align: center;
+  position:relative;
+}
+
+div#progressbar {
+  background-color: #12CC1A;
+  height: 20px;
+  color: #FFFFFF;
+  width: 0%;
+  -webkit-transition: width .3s;
+  -moz-transition: width .3s;
+  transition: width .3s;
+  position:absolute;
+}
+
+div#statustxt {
+  z-index: 999;
+  position: relative;
 }

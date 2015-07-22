@@ -39,13 +39,22 @@ if($show=='form'){
 	<div class="panel panel-default">
 		<div class="panel-heading">
 			<?php echo $add; ?>
+			<div class="pull-right filter">
+				<form method="post">
+					Search : 
+					<input type="text" name="s" value="<?php echo (!empty($_POST['s'])) ? $_POST['s'] : ''; ?>">
+					<input type="submit" class="btn btn-primary" name="filter" value="Submit"/>
+				</form>
+			</div>
 		</div>
 		<!-- /.panel-heading -->
 		<div class="panel-body">
 			<div class="dataTable_wrapper">
 				<div class="row"><?php echo $tabel; ?></div>
 				<div class="row text-right">
-					<?php echo $page; ?>
+					<div class="paging">
+						<?php echo $page; ?>
+					</div>
 				</div>
 			</div>
 		</div>

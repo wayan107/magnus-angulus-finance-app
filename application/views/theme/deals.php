@@ -161,6 +161,17 @@ if($show=='form'){
 							echo form_input($f);
 						?>
 					</div>
+					
+					<div class="col-sm-3">
+						<label>Rental Type</label>
+						<?php
+							$options=array(
+											'0'	=> 'Yearly',
+											'1' => 'Monthly'
+										);
+							echo form_dropdown('rental_type',$options,$rental_type,'id="rental-type" class="form-control"');
+						?>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -205,6 +216,26 @@ if($show=='form'){
 						?>
 					</div>
 					
+					<div class="col-sm-3">
+						<label>Rental Duration</label>
+						<?php
+							$options=array(
+											'1'	=> '1',
+											'2' => '2',
+											'3'	=> '3',
+											'4' => '4',
+											'5'	=> '5',
+											'6' => '6',
+											'7'	=> '7',
+											'8' => '8',
+											'9'	=> '9',
+											'10'	=> '10',
+											'11'	=> '11',
+											'12'	=> '12'
+										);
+							echo form_dropdown('rental_duration',$options,$rental_duration,'class="form-control"');
+						?>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -438,6 +469,11 @@ if($show=='form'){
 			</div>
 		</div>
 		<!-- /.panel-body -->
+		<div class="panel-footer">
+			<div class="text-right">
+				<a href="<?php echo base_url(); ?>/deals/import" class="btn btn-primary">Import Data Deal</a>
+			</div>
+		</div>
 	</div>
 	<?php
 }

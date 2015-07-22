@@ -44,5 +44,27 @@ class Dealsmodel extends CI_Model{
 		}
 		return $return;
 	}
+	
+	public function add_client($data){
+		$query = $this->db->query('select id from fn_client where name like "%'.$data['name'].'%"');
+		if($query->num_rows()>0){
+			$q = $query->row();
+			return $q->id;
+		}else{
+			$this->db->insert('client',$data);
+			return $this->db->insert_id();
+		}
+	}
+	
+	public function add_owner($data){
+		$query = $this->db->query('select id from fn_owner where name like "%'.$data['name'].'%"');
+		if($query->num_rows()>0){
+			$q = $query->row();
+			return $q->id;
+		}else{
+			$this->db->insert('owner',$data);
+			return $this->db->insert_id();
+		}
+	}
 }
 ?>

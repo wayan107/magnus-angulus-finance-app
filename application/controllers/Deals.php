@@ -10,7 +10,7 @@ class Deals extends CI_Controller{
 		private $textbox=array('id','villa_code','client','owner','checkin_date','checkout_date','deal_date',
 								'deal_price','deal_price_currency','consult_fee','consult_fee_currency','area',
 								'deposit','deposit_currency','deposit_in','contract_number','sales_agent','listing_agent',
-								'date_created','remark');
+								'date_created','remark','rental_duration','rental_type');
 		
 	public function __construct(){
 		parent::__construct();
@@ -63,12 +63,12 @@ class Deals extends CI_Controller{
 		$deal_id = $this->mydb->insert($this->tabel,$data);
 		$this->_save_payment_plans($deal_id);
 		
-		if($this->_is_submit_sales_manager_commission($data['deal_date'])){
+		//if($this->_is_submit_sales_manager_commission($data['deal_date'])){
 			$comm_data = array();
 			$this->_set_commission_data($comm_data,$deal_id);
 
 			$this->_save_agent_commission($comm_data,true);
-		}
+		//}
 		
 		echo"<script>alert('Data Saved Successfully'); window.location='".base_url().$this->redirect."'</script>";
 	}
@@ -134,11 +134,11 @@ class Deals extends CI_Controller{
 		$this->mydb->update($this->tabel,$data,$this->primary,$id);
 		$this->_save_payment_plans($id);
 		
-		if($this->_is_submit_sales_manager_commission($data['deal_date'])){
+		//if($this->_is_submit_sales_manager_commission($data['deal_date'])){
 			$comm_data = array();
 			$this->_set_commission_data($comm_data,$id);
 			$this->_update_agent_commission($comm_data);
-		}
+		//}
 		
 		echo"<script>alert('Data Updated Successfully'); window.location='".base_url().$this->redirect."'</script>";
 	}
@@ -344,7 +344,7 @@ class Deals extends CI_Controller{
 								'pp_ref'			=> $ref
 							);
 	
-			if($sales_manager){
+			if($sales_manager && strtotime($_POST['deal_date']) > strtotime('2015-06-15')){
 				if($_POST['sales_agent']!=$sales_manager){
 					$comm_data[]=array(
 							'deal_id'			=> $deal_id,
@@ -392,9 +392,81 @@ class Deals extends CI_Controller{
 	
 	private function _is_submit_sales_manager_commission($deal_date){
 		if(strtotime($deal_date) > strtotime('2015-06-15')){
-			return true;
+				return true;
+			}
+			return false;
 		}
-		return false;
+		
+	public function import(){
+		$data['_page_title'] = 'Import Deals data';
+		$this->myci->display_adm('theme/importdeals.php',$data);
+	}
+	
+	public function doimport(){
+		$this->load->library('excel');
+		if(isset($_FILES["FileInput"]) && $_FILES["FileInput"]["error"]== UPLOAD_ERR_OK)
+		{
+			$file = APPPATH."/third_party/f.xls";
+
+			//check if this is an ajax request
+			if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
+				die();
+			}
+			
+			
+			//Is file size is less than allowed size.
+			if ($_FILES["FileInput"]["size"] > 5242880) {
+				die("File size is too big!");
+			}
+			
+			//allowed file type Server side check
+			if(strtolower($_FILES['FileInput']['type']!='application/vnd.ms-excel')) die('Unsupported File Type!');
+			
+			$objPHPExcel = PHPExcel_IOFactory::load($_FILES['FileInput']['tmp_name']);
+			$sheetData = $objPHPExcel->getActiveSheet()->toArray(null,true,true,true);
+
+			$import_data = array();
+			$agents = array(
+							'aliya'			=> '1',
+							'ayu astriani'	=> '2',
+							'ayu merta'		=> '5',
+							'jefrie'		=> '10',
+							'mark'			=> '12',
+							'theo'			=> '13'
+						);
+			
+			foreach($sheetData as $dt){
+				$deal_date = new DateTime($dt['F'].' 00:00:00');
+				$price = explode(' ',$dt['I']);
+				$consult_fee = explode(' ',$dt['J']);
+				$import_data [] = array(
+										'villa_code'		=> $dt['B'],
+										'contract_number'	=> $dt['C'],
+										'client'			=> $this->dealsmodel->add_client(array('name'=>$dt['D'])),
+										'owner'			=> $this->dealsmodel->add_owner(array('name'=>$dt['E'])),
+										'deal_date'		=> $deal_date->format('Y-m-d'),
+										'deal_price'		=> str_replace(array(',','.'),'',trim($price[2])),
+										'deal_price_currency'	=> trim($price[0]),
+										'consult_fee'		=> str_replace(array(',','.'),'',trim($consult_fee[2])),
+										'consult_fee_currency'	=> trim($consult_fee[0]),
+										'sales_agent'			=> $agents[strtolower($dt['K'])],
+										'remark'				=> $dt['L'],
+										'post_status'			=> 'Finalized Deal'
+									);
+			}
+			
+			if(!empty($import_data)){
+				$this->db->insert_batch('deals',$import_data);
+				die('Data is imported successfully');
+			}else{
+				die('Your spreadsheet is empty');
+			}
+			
+		}
+		else
+		{
+			die('Something wrong with upload! Is "upload_max_filesize" set correctly?');
+		}
 	}
 }
 ?>

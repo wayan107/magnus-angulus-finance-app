@@ -71,12 +71,20 @@
 		
 		public function _view($offset=0){
 			$data['add']=anchor($this->controller.'/add','Add New',array('class'=>'btn btn-primary'));
-			//$data['import']=anchor($this->controller.'/import','Import',array('class'=>'button'));
+			
+			$where = 'where 1=1';
+			if(!empty($_POST['filter'])){
+				$where .= ' and (name like "%'.$_POST['s'].'%" or prefix like "%'.$_POST['s'].'%")';
+			}
 			$field='name,prefix';
 			$data['_page_title'] = $this->page_name;
-			$query=$this->db->query("select id,$field from ".$this->tabel." limit $offset , ".$this->limit);
 			
-			$data['page']=$this->myci->page($this->tabel,$this->limit,$this->controller,3);
+			$sql = "select id,$field from ".$this->tabel." ".$where;
+			$query=$this->db->query($sql." limit $offset , ".$this->limit);
+			
+			$page_query = $this->db->query($sql);
+			
+			$data['page']=$this->myci->page2($page_query->num_rows(),$this->limit,$this->controller,3);
 			$data['show']='data';
 			$data['tabel']=$this->myci->table_admin($query,$field,$field,$this->controller,$this->primary);
 			$this->myci->display_adm('theme/'.$this->view,$data);

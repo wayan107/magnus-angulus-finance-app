@@ -65,6 +65,9 @@
 				<p>
 					<label>Check Out</label> <?php echo $dt['checkout_date']; ?>
 				</p>
+				<p>
+					<label>Rental Type</label> <?php if($dt['rental_type']==0){ echo 'Yearly'; $duration='Year'; }else{ echo 'Monthly'; $duration='Month'; } ?>
+				</p>
 			</div>
 			
 			<div class="col-sm-3">
@@ -77,6 +80,9 @@
 				</p>
 				<p>
 					<label>Payment Via</label> <?php echo $dt['payment_via']; ?>
+				</p>
+				<p>
+					<label>Rental Duration</label> <?php echo $dt['rental_duration'].' '.$duration; echo ($dt['rental_duration']>1) ? 's' : ''; ?>
 				</p>
 			</div>
 			

@@ -75,6 +75,7 @@
     <script src="<?php echo base_url(); ?>asset/bower_components/metisMenu/dist/metisMenu.min.js"></script>
     
     <script src="<?php echo base_url(); ?>asset/dist/js/my-js-small-plugin.js"></script>
+	<script src="<?php echo base_url(); ?>asset/dist/js/jquery.form.js"></script>
 	<script src="<?php echo base_url(); ?>asset/dist/js/sb-admin-2.js"></script>
 
 	<?php if($this->myci->is_home()){ ?>
