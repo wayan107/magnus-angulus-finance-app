@@ -150,13 +150,22 @@ class Deals extends CI_Controller{
 		redirect($this->redirect);
 	}
 	
+	public function breaks($id){
+		//$this->mydb->delete($this->tabel,$this->primary,$id);
+		//$this->_delete_payment_plans($id);
+		//$this->_delete_agent_commissions($id);
+		$data['post_status'] = 'Break';
+		$this->db->update('deals',$data,array('id'=>$id));
+		redirect($this->redirect);
+	}
+	
 	public function _view($offset=0){
 		$data['add']=($this->myci->user_role=='admin') ? anchor($this->controller.'/add','Add New',array('class'=>'btn btn-primary')) : '';
 		$data['filter_class'] = ($this->myci->user_role=='admin') ? 'pull-right' : '';
-		$field='deal_date,villa_code,contract_number,CONCAT(deal_price_currency," ",CAST(FORMAT(deal_price,0) as CHAR)) as deal_amount';
+		$field='deal_date,post_status,villa_code,contract_number,CONCAT(deal_price_currency," ",CAST(FORMAT(deal_price,0) as CHAR)) as deal_amount';
 		$data['_page_title'] = $this->page_name;
 
-		$where='where (post_status="'.$this->config->item('deal').'" or post_status="'.$this->config->item('finalized_deal').'") and 1=1';
+		$where='where (post_status="'.$this->config->item('deal').'" or post_status="'.$this->config->item('finalized_deal').'" or post_status="Break") and 1=1';
 		if(!empty($_POST['filter'])){
 			if($_POST['area']){
 				$where .= " and area='".$_POST['area']."'";
@@ -190,11 +199,11 @@ class Deals extends CI_Controller{
 		$q_page = $q_page->row();
 		$data['page']=$this->myci->page2($q_page->total_rows,$this->limit,$this->controller,3);
 		$data['show']='data';
-		$data['tabel']=$this->myci->table_admin($query,$field,$table_header,$this->controller,$this->primary,true);
+		$data['tabel']=$this->myci->table_admin($query,$field,$table_header,$this->controller,$this->primary,true,true);
 		$this->myci->display_adm('theme/'.$this->view,$data);
 	}
 	
-	public function inquiries($offset=0){
+	/*public function inquiries($offset=0){
 		if($this->myci->is_user_logged_in()){
 			$this->_view_inquary($offset);
 		}
@@ -236,7 +245,7 @@ class Deals extends CI_Controller{
 		$data['tabel']=$this->myci->table_admin($query,$field,$table_header,$this->controller,$this->primary,true);
 		$this->myci->display_adm('theme/'.$this->view,$data);
 	}
-	
+	*/
 	private function _save_payment_plans($deal_id){
 		$deal_payment_plan = $this->myci->post(array('deal_plan_amount','deal_plan_date','deal_plan_currency','deal_plan_paid','deal_plan_ref_number','deal_plan_payment_id'));
 		$fee_payment_plan = $this->myci->post(array('fee_plan_amount','fee_plan_date','fee_plan_currency','fee_plan_paid','fee_plan_ref_number','fee_plan_payment_id'));
@@ -420,7 +429,7 @@ class Deals extends CI_Controller{
 			}
 			
 			//allowed file type Server side check
-			if(strtolower($_FILES['FileInput']['type']!='application/vnd.ms-excel')) die('Unsupported File Type!');
+			//if(strtolower($_FILES['FileInput']['type']!='application/vnd.ms-excel')) die('Unsupported File Type!! - '.$_FILES['FileInput']['type']);
 			
 			$objPHPExcel = PHPExcel_IOFactory::load($_FILES['FileInput']['tmp_name']);
 			$sheetData = $objPHPExcel->getActiveSheet()->toArray(null,true,true,true);
@@ -444,12 +453,12 @@ class Deals extends CI_Controller{
 										'contract_number'	=> $dt['C'],
 										'client'			=> $this->dealsmodel->add_client(array('name'=>$dt['D'])),
 										'owner'			=> $this->dealsmodel->add_owner(array('name'=>$dt['E'])),
-										'deal_date'		=> $deal_date->format('Y-m-d'),
-										'deal_price'		=> str_replace(array(',','.'),'',trim($price[2])),
+										'deal_date'		=> (!empty($dt['F'])) ? $deal_date->format('Y-m-d') : '0000-00-00',
+										'deal_price'		=> str_replace(array(',','.'),'',trim($price[1])),
 										'deal_price_currency'	=> trim($price[0]),
-										'consult_fee'		=> str_replace(array(',','.'),'',trim($consult_fee[2])),
+										'consult_fee'		=> str_replace(array(',','.'),'',trim($consult_fee[1])),
 										'consult_fee_currency'	=> trim($consult_fee[0]),
-										'sales_agent'			=> $agents[strtolower($dt['K'])],
+										'sales_agent'			=> (!empty($dt['K'])) ? $agents[strtolower($dt['K'])] : '0',
 										'remark'				=> $dt['L'],
 										'post_status'			=> 'Finalized Deal'
 									);

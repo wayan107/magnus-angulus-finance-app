@@ -41,7 +41,7 @@
 			}
 			
 			$field='d.deal_date,d.villa_code,CONCAT(d.contract_number,"-",p.ref_number) as contract_number,CONCAT(p.currency," ",CAST(FORMAT(p.amount,0) as CHAR)) as ppamount, p.date,p.paid';
-			$query=$this->db->query('select p.id,'.$field.'
+			$query=$this->db->query('select p.id,'.$field.',d.post_status
 									from fn_payment_plan p
 									inner join fn_deals d on d.id=p.deal_id
 									'.$where.'

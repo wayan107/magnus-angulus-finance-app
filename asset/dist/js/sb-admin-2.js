@@ -340,7 +340,7 @@ jQuery(document).ready(function(){
 		   var fsize = $('#FileInput')[0].files[0].size; //get file size
 			   var ftype = $('#FileInput')[0].files[0].type; // get file type
 			//allow file types 
-		  switch(ftype)
+		  /*switch(ftype)
 			   {
 				case 'image/png': 
 				case 'image/gif': 
@@ -357,7 +357,7 @@ jQuery(document).ready(function(){
 				default:
 				 $("#output").html("<b>"+ftype+"</b> Unsupported file type!");
 			 return false
-			   }
+			   }*/
 		
 		   //Allowed file size is less than 5 MB (1048576 = 1 mb)
 		   if(fsize>5242880) 
@@ -387,5 +387,4 @@ jQuery(document).ready(function(){
 			$('#output').html('<i class="fa fa-spinner fa-pulse"></i> Saving Data, please wait...');
 		}
 	}
-
 });

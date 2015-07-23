@@ -151,7 +151,7 @@
 						END) as comm_amount
 						';
 
-			$query = $this->db->query('SELECT d.id,ac.id as ac_id,
+			$query = $this->db->query('SELECT d.id,ac.id as ac_id,d.post_status,
 							'.$fields.'
 							from fn_agent_commission ac
 							inner join fn_deals d on ac.deal_id=d.id

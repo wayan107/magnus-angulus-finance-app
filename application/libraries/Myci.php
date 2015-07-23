@@ -214,7 +214,7 @@ class Myci{
 			array_unshift($heading,'No');
 			//array_push($heading,'Action');
 			$this->ci->table->set_heading($heading);
-			$table_row=1;
+			$table_row=1+(int)$this->ci->uri->segment(3);
 			
 			foreach($query->result_array() as $dts){
 			//pembuatan baris data dlm bentuk array (data berasal dari dari query)
@@ -274,7 +274,7 @@ class Myci{
 			array_unshift($heading,'No');
 			array_push($heading,'Action');
 			$this->ci->table->set_heading($heading);
-			$table_row=1;
+			$table_row=1+(int)$this->ci->uri->segment(3);
 			foreach($query->result_array() as $dts){
 			
 			//pembuatan baris data dlm bentuk array (data berasal dari dari query)
@@ -297,7 +297,7 @@ class Myci{
 			
 	}
 	
-	function table_admin($query,$field='',$as='',$controller,$primary,$see_details=false){
+	function table_admin($query,$field='',$as='',$controller,$primary,$see_details=false,$break=false){
 			$this->ci->load->library('table');
 			$tmpl = array (
                     'table_open'          => '<table border="0" class="table table-striped table-bordered table-hover data-table">',
@@ -340,31 +340,38 @@ class Myci{
 			array_unshift($heading,'No');
 			array_push($heading,'Action');
 			$this->ci->table->set_heading($heading);
-			$table_row=1;
-			
+			$table_row=1+(int)$this->ci->uri->segment(3);
+			$class='';
 			foreach($query->result_array() as $dts){
 			
 			//pembuatan baris data dlm bentuk array (data berasal dari dari query)
-
-				$item_row[0]=$table_row; 
+				if($break){
+					if($dts['post_status']=='Break'){
+						$class='break';
+					}else{
+						$class='';
+					}
+				}
+				$item_row[0]=array('data'=>$table_row,'class'=>$class); 
 				$table_row++;
 				for($i=0;$i<$jumField;$i++){
 					
-					$item_row[$i+1]=$dts[$fields[$i]];
+					$item_row[$i+1]=array('data'=>$dts[$fields[$i]],'class'=>$class);
 					
 				}
 				if($this->user_role=='admin' || ($this->user_role=='superadmin' && $controller=='users')){
 					$buttons=array(
-						anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit')),
 						anchor($controller.'/delete/'.$dts[$primary],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')"))
 					);
 				}else{
 					$buttons=array();
 				}
+				if(empty($class)) array_unshift($buttons,anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit')));
 				if($see_details) array_unshift($buttons,anchor($controller.'/viewdetail/'.$dts[$primary],'<i class="fa fa-search-plus"></i>',array('class'=>'button-view pop-up')));
+				if($break) array_push($buttons,anchor($controller.'/breaks/'.$dts[$primary],'<i class="fa fa-thumbs-down"></i>',array('class'=>'button-view','title'=>'Break the contract',"onClick"=>"return confirm('Sure want to break this contract?')")));
 				
 				//$cel=array('data'=>anchor($controller.'/update/'.$dts[$primary],'<i class="fa fa-edit"></i>',array('class'=>'button_edit'))." ".anchor($controller.'/delete/'.$dts[$primary],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')")), 'class'=>'aksi');
-				$cel=array('data'=>implode(' ',$buttons),'class'=>'aksi');
+				$cel=array('data'=>implode(' ',$buttons),'class'=>'aksi '.$class);
 				$item_row[$i+1]=$cel;
 				
 				//pembuatan baris pada tabel dan memasukkan data 
@@ -418,7 +425,7 @@ class Myci{
 			array_unshift($heading,'No');
 			array_push($heading,'Action');
 			$this->ci->table->set_heading($heading);
-			$table_row=1;
+			$table_row=1+(int)$this->ci->uri->segment(3);
 			
 			foreach($query->result_array() as $dts){
 			
@@ -513,7 +520,7 @@ class Myci{
 			array_unshift($heading,'No');
 			array_push($heading,$action_name);
 			$this->ci->table->set_heading($heading);
-			$table_row=1;
+			$table_row=1+(int)$this->ci->uri->segment(3);
 			
 			foreach($query->result_array() as $dts){
 			//pembuatan baris data dlm bentuk array (data berasal dari dari query)
@@ -523,10 +530,15 @@ class Myci{
 					$item_row[$i+1]=$dts[$fields[$i]];
 				}
 				
-				$button_class=($dts[$value]==0) ? 'activate' : 'deactivate';
-				$button_title=($dts[$value]==0) ? 'Unpaid' : 'Paid';
+				if($dts['post_status']=='Break'){
+					$button_class='break';
+					$button_title='Break';
+				}else{
+					$button_class=($dts[$value]==0) ? 'activate' : 'deactivate';
+					$button_title=($dts[$value]==0) ? 'Unpaid' : 'Paid';
+				}
 				
-				$button_toogle = ($this->user_role=='admin') ? anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts[$primary])) : '<span class="circle-button '.$button_class.'" title="'.$button_title.'"></span>';
+				$button_toogle = ($this->user_role=='admin' && $dts['post_status']!='Break') ? anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts[$primary])) : '<span class="circle-button '.$button_class.'" title="'.$button_title.'"></span>';
 				$buttons=array(
 					$button_toogle,
 					anchor($controller.'/generateinvoice/'.$dts[$primary],'<i class="fa fa-file-pdf-o"></i>',array('title'=>'Export to PDF','target'=>'_blank'))
@@ -587,7 +599,7 @@ class Myci{
 			array_unshift($heading,'No');
 			array_push($heading,$action_name);
 			$this->ci->table->set_heading($heading);
-			$table_row=1;
+			$table_row=1+(int)$this->ci->uri->segment(3);
 			
 			foreach($query->result_array() as $dts){
 			//pembuatan baris data dlm bentuk array (data berasal dari dari query)
@@ -602,10 +614,15 @@ class Myci{
 					}
 				}
 				
-				$button_class=($dts[$value]==0) ? 'activate' : 'deactivate';
-				$button_title=($dts[$value]==0) ? 'Unpaid' : 'Paid';
-				$button_toogle = ($this->user_role=='admin') ? anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts['ac_id'].'-'.$dts['agent_id'],'data-type'=>$dts['type'])) : '<span class="circle-button '.$button_class.'" title="'.$button_title.'"></span>';
-				$delete_button = ($this->user_role=='admin') ? anchor($controller.'/delete/'.$dts['ac_id'],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')")) : '';
+				if($dts['post_status']=='Break'){
+					$button_class='break';
+					$button_title='Break';
+				}else{
+					$button_class=($dts[$value]==0) ? 'activate' : 'deactivate';
+					$button_title=($dts[$value]==0) ? 'Unpaid' : 'Paid';
+				}
+				$button_toogle = ($this->user_role=='admin' && $dts['post_status']!='Break') ? anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts['ac_id'].'-'.$dts['agent_id'],'data-type'=>$dts['type'])) : '<span class="circle-button '.$button_class.'" title="'.$button_title.'"></span>';
+				$delete_button = ($this->user_role=='admin' && $dts['post_status']!='Break') ? anchor($controller.'/delete/'.$dts['ac_id'],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')")) : '';
 				$buttons=array(
 					$button_toogle,
 					$delete_button
@@ -667,7 +684,7 @@ class Myci{
 			array_unshift($heading,'No');
 			array_push($heading,'Action');
 			$this->ci->table->set_heading($heading);
-			$table_row=1;
+			$table_row=1+(int)$this->ci->uri->segment(3);
 			foreach($query->result_array() as $dts){
 			
 			//pembuatan baris data dlm bentuk array (data berasal dari dari query)
@@ -733,7 +750,7 @@ class Myci{
 			array_unshift($heading,'No');
 			array_push($heading,'Action');
 			$this->ci->table->set_heading($heading);
-			$table_row=1;
+			$table_row=1+(int)$this->ci->uri->segment(3);
 			foreach($query->result_array() as $dts){
 			
 			//pembuatan baris data dlm bentuk array (data berasal dari dari query)

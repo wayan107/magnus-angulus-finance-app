@@ -95,7 +95,7 @@
 					<label>Sales Agent</label> <?php echo $dt['sales']; ?>
 				</p>
 				<p>
-					<label>Listing Agent</label> <?php echo $dt['listing']; ?>
+					<label>Listing Agent</label> <?php echo (!empty($dt['listing'])) ? $dt['listing'] : 'Office'; ?>
 				</p>
 			</div>
 		</div>
