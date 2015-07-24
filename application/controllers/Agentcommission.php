@@ -64,88 +64,92 @@
 								CONCAT(consult_fee_currency," ",CAST(FORMAT((pp.amount*ag.commission/100),0) as CHAR))
 							
 							WHEN ac.commission_type="listing agent commission" THEN
-								case when 
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<99999999 then "IDR 500,000"
-										
-									when
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<149999999 then "IDR 750,000"
-											
-									when
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<299999999 then "IDR 1,000,000"
-											
-									when
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<499999999 then "IDR 1,500,000"
-											
-									when
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<749999999 then "IDR 2,000,000"
-											
-									when
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<999999999 then "IDR 2,500,000"
-											
-									when
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<1999999999 then "IDR 3,000,000"
-											
-									when
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<2999999999 then "IDR 4,000,000"
-											
-									when
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<3999999999 then "IDR 5,000,000"
-											
-									when
-										(case
-											when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
-											when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
-											when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
-											else d.deal_price
-										end)<4999999999 then "IDR 6,000,000"
-											
-									else "IDR 7.000.000" end
-							
+								CASE
+									WHEN d.rental_type="1" THEN
+										CONCAT(consult_fee_currency," ",CAST(FORMAT((d.consult_fee*5/100),0) as CHAR))
+									WHEN d.rental_type="0" THEN
+										case when 
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<99999999 then "IDR 500,000"
+												
+											when
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<149999999 then "IDR 750,000"
+													
+											when
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<299999999 then "IDR 1,000,000"
+													
+											when
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<499999999 then "IDR 1,500,000"
+													
+											when
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<749999999 then "IDR 2,000,000"
+													
+											when
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<999999999 then "IDR 2,500,000"
+													
+											when
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<1999999999 then "IDR 3,000,000"
+													
+											when
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<2999999999 then "IDR 4,000,000"
+													
+											when
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<3999999999 then "IDR 5,000,000"
+													
+											when
+												(case
+													when d.deal_price_currency="USD" then d.deal_price*'.$usd_rate.'
+													when d.deal_price_currency="EUR" then d.deal_price*'.$eur_rate.'
+													when d.deal_price_currency="AUD" then d.deal_price*'.$aud_rate.'
+													else d.deal_price
+												end)<4999999999 then "IDR 6,000,000"
+													
+										else "IDR 7.000.000" end
+								END
 							WHEN ac.commission_type="sales manager commission" THEN
 								CONCAT(consult_fee_currency," ",CAST(FORMAT((pp.amount*5/100),0) as CHAR))
 						END) as comm_amount

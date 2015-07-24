@@ -419,7 +419,7 @@ class Inquiries extends CI_Controller{
 		$data=$this->myci->post($this->textbox);
 		
 		$inquiry_date = new DateTime('now',new DateTimeZone('Asia/Makassar'));
-		$data['inquiry_date'] = $inquiry_date->format('Y-m-d');//date('Y-m-d');//$date->format('Y-m-d');
+		$data['inquiry_date'] = $inquiry_date->format('Y-m-d');
 		
 		$date = new DateTime($data['plan_move_in'].' 00:00:00');
 		$data['plan_move_in'] = $date->format('Y-m-d');

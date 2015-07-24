@@ -100,6 +100,10 @@
                                 </li>
                             </ul>
                         </li>
+						<?php } if(in_array($userrole,unserialize(EMAILBLAST))){?>
+						<li>
+							<a href="<?php echo base_url(); ?>emailblast/"><i class="fa fa-inbox"></i> Email Blast</a>
+						</li>
 						<?php } ?>
 						<!--admin menu end-->
                     </ul>

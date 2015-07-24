@@ -387,4 +387,16 @@ jQuery(document).ready(function(){
 			$('#output').html('<i class="fa fa-spinner fa-pulse"></i> Saving Data, please wait...');
 		}
 	}
+	
+	jQuery('#sendemailblast').click(function(){
+		alert('masuk');
+		jQuery.ajax({
+			url		: baseurl+'emailblast/sendemail',
+			type	: 'POST',
+			data	: {'plan':jQuery('#plan').val()},
+			success	: function(e){
+				jQuery('#result').html(e);
+			}
+		});
+	});
 });
