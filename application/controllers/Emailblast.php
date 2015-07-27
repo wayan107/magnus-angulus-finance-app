@@ -10,8 +10,12 @@ class Emailblast extends CI_Controller{
 	}
 	
 	public function sendemail(){
-		$url = 'http://www.balilongtermrentals.com/wp-content/plugins/bltrfunc/func/curlfunc.php';
-		$field = 'mode=blast';
+		if($_POST['plan']==0){
+			$url = 'http://www.balilongtermrentals.com/wp-content/plugins/bltrfunc/func/curlfunc.php';
+		}else{
+			$url = 'http://www.balivillasales.com/wp-content/plugins/villasofbali/func/curlfunc.php';
+		}
+		$field = 'mode=blast&posts_per_page=10';
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL,  $url);
 		curl_setopt($ch, CURLOPT_POSTFIELDS,  $field);
@@ -22,21 +26,32 @@ class Emailblast extends CI_Controller{
 		$villas = curl_exec($ch);
 		curl_close($ch);
 		
+		$rent_logo = "http://www.balilongtermrentals.com/wp-content/uploads/2015/03/balilongtermrentals1.jpg";
+		$buy_logo = "http://www.balivillasales.com/wp-content/uploads/2015/02/sale-lease.jpg";
 		$villas = unserialize($villas);
-		$email = $this->load->view('theme/email-template',array('villas'=>$villas),true);
+		$data = array(
+					'villas'=> $villas,
+					'logo'	=> ($_POST['plan']==0) ? $rent_logo : $buy_logo
+				);
+		$email = $this->load->view('theme/email-template',$data,true);
 		
-		$client_email = $this->get_client_email(0);
+		$client_email = $this->get_client_email($_POST['plan']);
 		
-		/*echo '<pre>';
-		print_r($client_email->result_array());
-		echo '</pre>';
-		
-		exit();*/
+		$proggress_step['step'] = 0;
+		$step = 100 / (int) $client_email->num_rows();
+		$file = dirname(BASEPATH).'/session/proggress.json';
 		foreach($client_email->result_array() as $ce){
 			$this->email($email,$ce['email'],$ce['name']);
+			$proggress_step['step'] += $step;
+			file_put_contents($file,json_encode($proggress_step));
+			sleep(1);
 		}
 	}
 	
+	public function done(){
+		$file = dirname(BASEPATH).'/session/proggress.json';
+		file_put_contents($file,'');
+	}
 	private function email($msg,$to,$nameto){
 		// To send HTML mail, the Content-type header must be set
 		$headers  = 'MIME-Version: 1.0' . "\r\n";

@@ -4,11 +4,14 @@
 	<div class="panel-body">
 		<div class="dataTable_wrapper">
 			<label>Plan</label> :
-			<select id="plan">
+			<select id="plan" class="inputclass">
 				<option value="0">Rent</option>
 				<option value="1">Buy</option>
 			</select>
-			<input type="button" id="sendemailblast" value="Send Email">
+			&nbsp;&nbsp;
+			<input type="button" class="btn btn-primary" id="sendemailblast" value="Send Email">
+			<br /><br />
+			<div id="progress-bar"><div class="progress-label">Preparing...</div></div>
 			
 			<div id="result"></div>
 		</div>

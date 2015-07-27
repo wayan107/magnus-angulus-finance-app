@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
 <div style="width:600px; margin:auto;">
 	<div style="text-align:center;margin-bottom: 30px;">
-		<img height="150px" src="http://www.balilongtermrentals.com/wp-content/uploads/2015/03/balilongtermrentals1.jpg">
+		<img height="150px" src="<?php echo $logo; ?>">
 	</div>
 	<div style="margin-bottom: 17px;">
 		We proudly present our top ten new listings for you.

@@ -389,7 +389,7 @@ jQuery(document).ready(function(){
 	}
 	
 	jQuery('#sendemailblast').click(function(){
-		alert('masuk');
+		runProggress();
 		jQuery.ajax({
 			url		: baseurl+'emailblast/sendemail',
 			type	: 'POST',
@@ -399,4 +399,39 @@ jQuery(document).ready(function(){
 			}
 		});
 	});
+	
+	function runProggress(){
+		var intervalId;
+		
+		var progressbar = $( "#progress-bar" ),
+		  progressLabel = $( ".progress-label" );
+		progressbar.progressbar({
+		  value: false,
+		  change: function() {
+			if(!progressbar.progressbar( "value" )){
+				progressLabel.text('Preparing...');
+			}else{
+				progressLabel.text( progressbar.progressbar( "value" ) + "%" );
+			}
+		  },
+		  complete: function() {
+			progressLabel.text( "Complete!" );
+		  }
+		});
+		progressLabel.show();
+		
+		intervalId = setInterval( function(){
+			$.ajaxSetup({ cache: false });
+			$.getJSON( baseurl+"session/proggress.json", function( data ) {
+				progressbar.progressbar( "value", data.step );
+				if(data.step==100){
+					clearInterval(intervalId);
+					jQuery.ajax({
+						url	: baseurl+'emailblast/done'
+					});
+				}
+			});
+		}, 1500 );
+		
+	}
 });
