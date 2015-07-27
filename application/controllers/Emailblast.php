@@ -30,18 +30,24 @@ class Emailblast extends CI_Controller{
 		$buy_logo = "http://www.balivillasales.com/wp-content/uploads/2015/02/sale-lease.jpg";
 		$villas = unserialize($villas);
 		$data = array(
-					'villas'=> $villas,
-					'logo'	=> ($_POST['plan']==0) ? $rent_logo : $buy_logo
+					'villas'	=> $villas,
+					'logo'		=> ($_POST['plan']==0) ? $rent_logo : $buy_logo,
+					'web_link'	=> ($_POST['plan']==0) ? 'http://www.balilongtermrentals.com' : 'http://www.balivillasales.com'
 				);
 		$email = $this->load->view('theme/email-template',$data,true);
 		
 		$client_email = $this->get_client_email($_POST['plan']);
+		$email_data = array(
+							'mailfrom'	=> ($_POST['plan']==0) ? 'info@balilongtermrentals.com' : 'info@balivillasales.com',
+							'namefrom'	=> ($_POST['plan']==0) ? 'Bali Long Term Rentals' : 'Bali Villa Sales',
+							'subject'	=> ($_POST['plan']==0) ? 'Newest Yearly Rental Villas' : 'Newest Villas For Sale'
+						);
 		
 		$proggress_step['step'] = 0;
 		$step = 100 / (int) $client_email->num_rows();
 		$file = dirname(BASEPATH).'/session/proggress.json';
 		foreach($client_email->result_array() as $ce){
-			$this->email($email,$ce['email'],$ce['name']);
+			$this->email($email,$ce['email'],$ce['name'],$email_data);
 			$proggress_step['step'] += $step;
 			file_put_contents($file,json_encode($proggress_step));
 			sleep(1);
@@ -52,15 +58,15 @@ class Emailblast extends CI_Controller{
 		$file = dirname(BASEPATH).'/session/proggress.json';
 		file_put_contents($file,'');
 	}
-	private function email($msg,$to,$nameto){
+	private function email($msg,$to,$nameto,$args){
 		// To send HTML mail, the Content-type header must be set
 		$headers  = 'MIME-Version: 1.0' . "\r\n";
 		$headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 		
-		$subject = 'Newest Yearly Rental Villas';
+		$subject = $args['subject'];
 		// Additional headers
 		$headers .= 'To: '.$nameto.' <'.$to.'>' . "\r\n";
-		$headers .= 'From:  Bali Long Term Rentals <info@balilongtermrentals.com>' . "\r\n";
+		$headers .= 'From:  '.$args['namefrom'].' <'.$args['mailfrom'].'>' . "\r\n";
 
 		// Mail it
 		mail($to, $subject, $msg, $headers);

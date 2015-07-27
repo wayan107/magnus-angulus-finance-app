@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
 <div style="width:600px; margin:auto;">
 	<div style="text-align:center;margin-bottom: 30px;">
-		<img height="150px" src="<?php echo $logo; ?>">
+		<a href="<?php echo $web_link; ?>"><img height="150px" src="<?php echo $logo; ?>"></a>
 	</div>
 	<div style="margin-bottom: 17px;">
 		We proudly present our top ten new listings for you.
