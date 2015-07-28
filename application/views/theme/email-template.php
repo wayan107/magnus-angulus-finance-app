@@ -33,4 +33,13 @@
 		<?php
 	}
 	?>
+	<div style="text-align:center;margin-top:30px;">
+		Team <?php echo $emaildata['namefrom']; ?><br>
+		+62 821-1159-8787 | <?php echo $emaildata['mailfrom']; ?><br>
+		​www.balilongtermrentals.com | www.balivillasales.com | www.villasofbali.com
+	</div>
+	<div style="margin:30px auto; text-align:center;">
+		<a href="http://www.villasofbali.com/unsubscribe/?cid=<?php echo $cid; ?>">Click here</a> if you want to stop this email coming to you.
+	</div>
+	
 </div>

@@ -34,7 +34,7 @@ class Emailblast extends CI_Controller{
 					'logo'		=> ($_POST['plan']==0) ? $rent_logo : $buy_logo,
 					'web_link'	=> ($_POST['plan']==0) ? 'http://www.balilongtermrentals.com' : 'http://www.balivillasales.com'
 				);
-		$email = $this->load->view('theme/email-template',$data,true);
+		
 		
 		$client_email = $this->get_client_email($_POST['plan']);
 		$email_data = array(
@@ -42,11 +42,14 @@ class Emailblast extends CI_Controller{
 							'namefrom'	=> ($_POST['plan']==0) ? 'Bali Long Term Rentals' : 'Bali Villa Sales',
 							'subject'	=> ($_POST['plan']==0) ? 'Newest Yearly Rental Villas' : 'Newest Villas For Sale'
 						);
+		$data['emaildata'] = $email_data;
 		
 		$proggress_step['step'] = 0;
 		$step = 100 / (int) $client_email->num_rows();
 		$file = dirname(BASEPATH).'/session/proggress.json';
 		foreach($client_email->result_array() as $ce){
+			$data['cid'] = $ce['id'];
+			$email = $this->load->view('theme/email-template',$data,true);
 			$this->email($email,$ce['email'],$ce['name'],$email_data);
 			$proggress_step['step'] += $step;
 			file_put_contents($file,json_encode($proggress_step));
@@ -73,9 +76,15 @@ class Emailblast extends CI_Controller{
 	}
 	
 	private function get_client_email($plan){
-		$query = $this->db->query('SELECT email,c.name from fn_client c
+		$query = $this->db->query('SELECT c.id,c.email,c.name from fn_client c
 									inner join fn_deals d on c.id=d.client
-									where d.plan="'.$plan.'" and c.email<>""');
+									where d.plan="'.$plan.'" and c.email<>"" and emailblast=0');
 		return $query;
+	}
+	
+	public function unsubscribe(){
+		$id = $_POST['cid'];
+		$data['emailblast'] = 1;
+		$this->db->update('client',$data,array('id'=>$id));
 	}
 }
