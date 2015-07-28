@@ -166,7 +166,7 @@ if($show=='form'){
 		<div class="panel-heading">
 			<?php echo $add; ?>
 			<div class="<?php echo $filter_class; ?> filter">
-				<form method="post">
+				<form action="<?php echo base_url().$this->uri->segment(1); ?>" method="post">
 				<span id="date-filter-label"><?php if (!empty($_POST['status']) && $_POST['status']=='Deal') echo 'Deal'; else echo 'Inquiry'; ?></span> Date From:
 				<input type="text" class="datepicker" name="date-start" value="<?php if (!empty($_POST['date-start'])) echo $_POST['date-start'];; ?>">
 				to

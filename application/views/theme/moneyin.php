@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
 	<div class="panel panel-default">
 		<div class="panel-heading filter">
-			<form method="post" id="generate">
+			<form action="<?php echo base_url().$this->uri->segment(1); ?>" method="post" id="generate">
 				Type <?php
 					$options=array(''=>'Choose','1'=>'Deals','2'=>'Cash','3'=>'On going');
 					$selected=(!empty($_POST['type'])) ? $_POST['type'] : '';

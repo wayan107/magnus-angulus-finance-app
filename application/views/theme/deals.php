@@ -440,7 +440,7 @@ if($show=='form'){
 		<div class="panel-heading">
 			<?php echo $add; ?>
 			<div class="<?php echo $filter_class; ?> filter">
-				<form method="post">
+				<form action="<?php echo base_url().$this->uri->segment(1); ?>" method="post">
 				Filter:
 				<input type="text" class="datepicker" name="date-start" value="<?php if (!empty($_POST['date-start'])) echo $_POST['date-start'];; ?>">
 				to

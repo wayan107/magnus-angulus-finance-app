@@ -1,7 +1,7 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed'); ?>
 	<div class="panel panel-default">
 		<div class="panel-heading filter">
-			<form method="post" id="find">
+			<form action="<?php echo base_url().$this->uri->segment(1); ?>" method="post" id="find">
 				From : <input type="text" name="date-start" class="datepicker" value="<?php echo (!empty($_POST['date-start'])) ? $_POST['date-start'] : ''; ?>">
 				Until : <input type="text" name="date-end" class="datepicker" value="<?php echo (!empty($_POST['date-end'])) ? $_POST['date-end'] : ''; ?>">
 				<?php echo form_dropdown('paid',array(''=>'All','0'=>'Unpaid','1'=>'Paid')); ?>

@@ -40,7 +40,7 @@ if($show=='form'){
 		<div class="panel-heading">
 			<?php echo $add; ?>
 			<div class="pull-right filter">
-				<form method="post">
+				<form action="<?php echo base_url().$this->uri->segment(1); ?>" method="post">
 					Search : 
 					<input type="text" name="s" value="<?php echo (!empty($_POST['s'])) ? $_POST['s'] : ''; ?>">
 					<input type="submit" class="btn btn-primary" name="filter" value="Submit"/>
