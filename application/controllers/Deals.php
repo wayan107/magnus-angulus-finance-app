@@ -501,6 +501,7 @@ class Deals extends CI_Controller{
 		$this->load->library('excel');
 		if(isset($_FILES["FileInput"]) && $_FILES["FileInput"]["error"]== UPLOAD_ERR_OK)
 		{
+			
 			//check if this is an ajax request
 			if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
 				die();
@@ -513,11 +514,12 @@ class Deals extends CI_Controller{
 			
 			//allowed file type Server side check
 			//if(strtolower($_FILES['FileInput']['type']!='application/vnd.ms-excel')) die('Unsupported File Type!! - '.$_FILES['FileInput']['type']);
-			
+
 			$objPHPExcel = PHPExcel_IOFactory::load($_FILES['FileInput']['tmp_name']);
 			$sheetData = $objPHPExcel->getActiveSheet()->toArray(null,true,true,true);
 
 			$import_data = array();
+			$commission_data = array();
 			$dealContractNo='';
 			$feeContractNo='';
 			$deal_ref=0;
@@ -525,8 +527,9 @@ class Deals extends CI_Controller{
 			
 			foreach($sheetData as $dt){
 				if(!empty($dt['A'])){
-					$dealId = $this->dealsmodel->getIdByContractNo($dt['A']);
-					if($dealId){
+					$deal = $this->dealsmodel->getDealByContractNo($dt['A']);
+					$sales_manager = $this->myci->get_the_sales_manager();
+					if($deal){
 						$dateIn = new DateTime($dt['C'].' 00:00:00');
 						$amount = explode(' ',$dt['B']);
 						
@@ -549,15 +552,46 @@ class Deals extends CI_Controller{
 								'currency'		=> $amount[0],
 								'date'			=> (!empty($dt['C'])) ? $dateIn->format('Y-m-d') : '0000-00-00',
 								'type'			=> strtolower($dt['D']),
-								'deal_id'		=> $dealId,
+								'deal_id'		=> $deal->id,
 								'ref_number'	=> ($dt['D']=='fee') ? $fee_ref : $deal_ref
 							);
+						
+						//prepare agent commission's data
+						if($dt['D']=='fee'){
+							$commission_data[] = array(
+								'deal_id'			=> $deal->id,
+								'agent'				=> $deal->sales_agent,
+								'commission_type'	=> 'sales agent commission',
+								'pp_ref'			=> $fee_ref
+							);
+							
+							if($sales_manager && strtotime($deal->deal_date) > strtotime('2015-06-15')){
+								if($deal->sales_agent!=$sales_manager){
+									$commission_data[]=array(
+											'deal_id'			=> $deal->id,
+											'agent'				=> $sales_manager,
+											'commission_type'	=> 'sales manager commission',
+											'pp_ref'			=> $fee_ref
+										);
+								}
+							}
+							
+							if(!empty($deal->listing_agent)){
+								$commission_data[]=array(
+										'deal_id'			=> $deal->id,
+										'agent'				=> $deal->listing_agent,
+										'commission_type'	=> 'listing agent commission',
+										'pp_ref'			=> ''
+									);
+							}
+						}
 					}
 				}
 			}
 
 			if(!empty($import_data)){
 				$this->db->insert_batch('payment_plan',$import_data);
+				$this->db->insert_batch('agent_commission',$commission_data);
 				die('Data is imported successfully');
 			}else{
 				die('Your spreadsheet is empty');

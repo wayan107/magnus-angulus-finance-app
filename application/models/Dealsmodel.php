@@ -67,11 +67,10 @@ class Dealsmodel extends CI_Model{
 		}
 	}
 	
-	public function getIdByContractNo($contractNo){
-		$query = $this->db->query('SELECT id from fn_deals where contract_number="'.$contractNo.'"');
+	public function getDealByContractNo($contractNo){
+		$query = $this->db->query('SELECT id,deal_date,sales_agent,listing_agent from fn_deals where contract_number="'.$contractNo.'"');
 		if($query->num_rows()>0){
-			$q = $query->row();
-			return $q->id;
+			return $query->row();
 		}else
 			return false;
 	}
