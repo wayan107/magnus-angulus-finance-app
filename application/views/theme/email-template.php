@@ -4,7 +4,8 @@
 		<a href="<?php echo $web_link; ?>"><img height="150px" src="<?php echo $logo; ?>"></a>
 	</div>
 	<div style="margin-bottom: 17px;">
-		We proudly present our top ten new listings for you.
+		Dear our valued customer,<br><br>
+Hereby we proudly present our newest listings, please don't hesitate to contact us if you have any questions regarding the listings or if you would like to book an inspection schedule, we would be very happy to assist you.
 	</div>
 	<?php
 	foreach($villas as $villa){
@@ -34,6 +35,7 @@
 	}
 	?>
 	<div style="text-align:center;margin-top:30px;">
+		Warm Regards,<br>
 		Team <?php echo $emaildata['namefrom']; ?><br>
 		+62 821-1159-8787 | <?php echo $emaildata['mailfrom']; ?><br>
 		​www.balilongtermrentals.com | www.balivillasales.com | www.villasofbali.com

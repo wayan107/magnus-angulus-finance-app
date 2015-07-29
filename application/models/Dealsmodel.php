@@ -66,5 +66,14 @@ class Dealsmodel extends CI_Model{
 			return $this->db->insert_id();
 		}
 	}
+	
+	public function getIdByContractNo($contractNo){
+		$query = $this->db->query('SELECT id from fn_deals where contract_number="'.$contractNo.'"');
+		if($query->num_rows()>0){
+			$q = $query->row();
+			return $q->id;
+		}else
+			return false;
+	}
 }
 ?>

@@ -5,7 +5,7 @@
 	</div>
 	<div class="panel-body">
 		<div class="dataTable_wrapper">
-			<form action="<?php echo base_url(); ?>deals/doimport" method="post" enctype="multipart/form-data" id="MyUploadForm">
+			<form action="<?php echo base_url(); ?>deals/<?php echo $action; ?>" method="post" enctype="multipart/form-data" id="MyUploadForm">
 				<input name="FileInput" id="FileInput" type="file"/> <br>
 				<input type="submit"  id="submit-btn" class="btn btn-primary" value="Import" />
 				<img src="" id="loading-img" style="display:none;" alt="Please Wait"/>

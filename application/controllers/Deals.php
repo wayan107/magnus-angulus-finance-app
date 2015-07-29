@@ -408,6 +408,13 @@ class Deals extends CI_Controller{
 		
 	public function import(){
 		$data['_page_title'] = 'Import Deals data';
+		$data['action']	= 'doimport';
+		$this->myci->display_adm('theme/importdeals.php',$data);
+	}
+	
+	public function importpaymentplan(){
+		$data['_page_title'] = 'Import Payment Plan data';
+		$data['action']	= 'doimportpaymentplan';
 		$this->myci->display_adm('theme/importdeals.php',$data);
 	}
 	
@@ -415,13 +422,10 @@ class Deals extends CI_Controller{
 		$this->load->library('excel');
 		if(isset($_FILES["FileInput"]) && $_FILES["FileInput"]["error"]== UPLOAD_ERR_OK)
 		{
-			$file = APPPATH."/third_party/f.xls";
-
 			//check if this is an ajax request
 			if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
 				die();
 			}
-			
 			
 			//Is file size is less than allowed size.
 			if ($_FILES["FileInput"]["size"] > 5242880) {
@@ -443,29 +447,117 @@ class Deals extends CI_Controller{
 							'mark'			=> '12',
 							'theo'			=> '13'
 						);
-			
+						
+			$listings = array(
+							'dewa'			=> '6',
+							'jefrie'		=> '7',
+							'windra'		=> '8',
+							'budi'			=> '9'
+						);
+						
 			foreach($sheetData as $dt){
-				$deal_date = new DateTime($dt['F'].' 00:00:00');
-				$price = explode(' ',$dt['I']);
-				$consult_fee = explode(' ',$dt['J']);
-				$import_data [] = array(
-										'villa_code'		=> $dt['B'],
-										'contract_number'	=> $dt['C'],
-										'client'			=> $this->dealsmodel->add_client(array('name'=>$dt['D'])),
-										'owner'			=> $this->dealsmodel->add_owner(array('name'=>$dt['E'])),
-										'deal_date'		=> (!empty($dt['F'])) ? $deal_date->format('Y-m-d') : '0000-00-00',
-										'deal_price'		=> str_replace(array(',','.'),'',trim($price[1])),
-										'deal_price_currency'	=> trim($price[0]),
-										'consult_fee'		=> str_replace(array(',','.'),'',trim($consult_fee[1])),
-										'consult_fee_currency'	=> trim($consult_fee[0]),
-										'sales_agent'			=> (!empty($dt['K'])) ? $agents[strtolower($dt['K'])] : '0',
-										'remark'				=> $dt['L'],
-										'post_status'			=> 'Finalized Deal'
-									);
+				if(!empty($dt['B'])){
+					$deal_date = new DateTime($dt['F'].' 00:00:00');
+					$checkin = new DateTime($dt['G'].' 00:00:00');
+					$checkout = new DateTime($dt['H'].' 00:00:00');
+					
+					$price = explode(' ',$dt['J']);
+					$consult_fee = explode(' ',$dt['K']);
+					$import_data [] = array(
+							'villa_code'		=> $dt['B'],
+							'contract_number'	=> $dt['C'],
+							'client'			=> $this->dealsmodel->add_client(array('name'=>$dt['D'])),
+							'owner'			=> $this->dealsmodel->add_owner(array('name'=>$dt['E'])),
+							'deal_date'		=> (!empty($dt['F'])) ? $deal_date->format('Y-m-d') : '0000-00-00',
+							'deal_price'		=> str_replace(array(',','.'),'',trim($price[1])),
+							'deal_price_currency'	=> trim($price[0]),
+							'consult_fee'		=> str_replace(array(',','.'),'',trim($consult_fee[1])),
+							'consult_fee_currency'	=> trim($consult_fee[0]),
+							'sales_agent'			=> (!empty($dt['L'])) ? $agents[strtolower($dt['L'])] : '0',
+							'remark'				=> $dt['N'],
+							'post_status'			=> 'Finalized Deal',
+							'checkin_date'			=> (!empty($dt['G'])) ? $checkin->format('Y-m-d') : '0000:00:00',
+							'checkout_date'			=> (!empty($dt['G'])) ? $checkout->format('Y-m-d') : '0000:00:00',
+							'listing_agent'			=> (!empty($dt['M'])) ? $listings[strtolower($dt['M'])] : '0'
+						);
+				}
 			}
 			
 			if(!empty($import_data)){
 				$this->db->insert_batch('deals',$import_data);
+				die('Data is imported successfully');
+			}else{
+				die('Your spreadsheet is empty');
+			}
+			
+		}
+		else
+		{
+			die('Something wrong with upload! Is "upload_max_filesize" set correctly?');
+		}
+	}
+	
+	public function doimportpaymentplan(){
+		$this->load->library('excel');
+		if(isset($_FILES["FileInput"]) && $_FILES["FileInput"]["error"]== UPLOAD_ERR_OK)
+		{
+			//check if this is an ajax request
+			if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])){
+				die();
+			}
+			
+			//Is file size is less than allowed size.
+			if ($_FILES["FileInput"]["size"] > 5242880) {
+				die("File size is too big!");
+			}
+			
+			//allowed file type Server side check
+			//if(strtolower($_FILES['FileInput']['type']!='application/vnd.ms-excel')) die('Unsupported File Type!! - '.$_FILES['FileInput']['type']);
+			
+			$objPHPExcel = PHPExcel_IOFactory::load($_FILES['FileInput']['tmp_name']);
+			$sheetData = $objPHPExcel->getActiveSheet()->toArray(null,true,true,true);
+
+			$import_data = array();
+			$dealContractNo='';
+			$feeContractNo='';
+			$deal_ref=0;
+			$fee_ref=0;
+			
+			foreach($sheetData as $dt){
+				if(!empty($dt['A'])){
+					$dealId = $this->dealsmodel->getIdByContractNo($dt['A']);
+					if($dealId){
+						$dateIn = new DateTime($dt['C'].' 00:00:00');
+						$amount = explode(' ',$dt['B']);
+						
+						if($dealContractNo==$dt['A'] && strtolower($dt['D'])=='deal'){
+							$deal_ref++;
+						}elseif($dealContractNo!=$dt['A'] && strtolower($dt['D'])=='deal'){
+							$deal_ref=1;
+							$dealContractNo = $dt['A'];
+						}
+						
+						if($feeContractNo==$dt['A'] && strtolower($dt['D'])=='fee'){
+							$fee_ref++;
+						}elseif($feeContractNo!=$dt['A'] && strtolower($dt['D'])=='fee'){
+							$fee_ref=1;
+							$feeContractNo = $dt['A'];
+						}
+						
+						$import_data [] = array(
+								'amount'		=> str_replace(array(',','.'),'',trim($amount[1])),
+								'currency'		=> $amount[0],
+								'date'			=> (!empty($dt['C'])) ? $dateIn->format('Y-m-d') : '0000-00-00',
+								'type'			=> strtolower($dt['D']),
+								'deal_id'		=> $dealId,
+								'ref_number'	=> ($dt['D']=='fee') ? $fee_ref : $deal_ref
+							);
+					}
+				}
+			}
+
+			if(!empty($import_data)){
+				$this->db->insert_batch('payment_plan',$import_data);
 				die('Data is imported successfully');
 			}else{
 				die('Your spreadsheet is empty');

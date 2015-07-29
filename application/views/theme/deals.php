@@ -471,7 +471,8 @@ if($show=='form'){
 		<!-- /.panel-body -->
 		<div class="panel-footer">
 			<div class="text-right">
-				<a href="<?php echo base_url(); ?>deals/import" class="btn btn-primary">Import Data Deal</a>
+				<a href="<?php echo base_url(); ?>deals/import" class="btn btn-primary">Import Deal Data</a>
+				<a href="<?php echo base_url(); ?>deals/importpaymentplan" class="btn btn-primary">Import Payment Plan Data</a>
 			</div>
 		</div>
 	</div>
