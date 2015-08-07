@@ -7,7 +7,7 @@ class Inquiries extends CI_Controller{
 		private $primary='id';
 		private $controller='inquiries';
 		private $view='inquiries';
-		private $textbox=array('id','inquiry_date','client','budget','plan','plan_move_in','bedroom',
+		private $textbox=array('id','inquiry_date','client','budget','plan','plan_move_in','plan_move_out','bedroom',
 								'furnishing','living','interested_villa','inquiry_msg','hold');
 		private $rental_budget, $sale_budget;
 		
@@ -31,6 +31,15 @@ class Inquiries extends CI_Controller{
 									'3'	=> 'USD 500K - 750K',
 									'4'	=> 'USD 750K - 1000K',
 									'5'	=> 'USD 1000K+'
+								);
+		
+		$this->monthly_budget = array(
+									'1'	=> 'IDR 0 - 10M',
+									'2'	=> 'IDR 10 - 20M',
+									'3'	=> 'IDR 20 - 30M',
+									'4'	=> 'IDR 30 - 40M',
+									'5'	=> 'IDR 40 - 50M',
+									'6'	=> 'IDR 50M+'
 								);
 	}
 	
@@ -70,6 +79,13 @@ class Inquiries extends CI_Controller{
 		
 		$date = new DateTime($data['plan_move_in'].' 00:00:00');
 		$data['plan_move_in'] = $date->format('Y-m-d');
+		if(!empty($data['plan_move_out'])){
+			$date = new DateTime($data['plan_move_out'].' 00:00:00');
+			$data['plan_move_out'] = $date->format('Y-m-d');
+		}else{
+			$data['plan_move_out'] = '0000-00-00';
+		}
+		
 		$data['budget'] = (!empty($data['budget'])) ? implode(',',$data['budget']) : '';
 		$data['bedroom'] = (!empty($data['bedroom'])) ? implode(',',$data['bedroom']) : '';
 		$data['post_status'] = 'Prospect';
@@ -133,7 +149,12 @@ class Inquiries extends CI_Controller{
 	private function _view($offset=0){
 		$data['add']=($this->myci->user_role=='sales_manager') ? anchor($this->controller.'/add','Add New',array('class'=>'btn btn-primary')) : '';
 		$data['filter_class'] = ($this->myci->user_role=='sales_manager') ? 'pull-right' : '';
-		$field='inquiry_date,(if(plan=0,"Rent","Buy")) as plan,plan_move_in,ag.name as agent,post_status,ag.id as agent_id';
+		$field='inquiry_date,plan_move_in,ag.name as agent,post_status,ag.id as agent_id,
+				(CASE
+					WHEN plan="0" THEN "Rent"
+					WHEN plan="1" THEN "Buy"
+					WHEN plan="2" THEN "Monthly"
+				END) as plan';
 		$data['_page_title'] = $this->page_name;
 		$inquiry_status = $this->config->item('inquiry');
 		
@@ -195,7 +216,7 @@ class Inquiries extends CI_Controller{
 	}
 	
 	public function viewdetail($id){
-		$data['query']=$this->db->query('select d.inquiry_date,d.budget,d.plan,d.plan_move_in,d.bedroom,
+		$data['query']=$this->db->query('select d.inquiry_date,d.budget,d.plan,d.plan_move_in,plan_move_out,d.bedroom,
 											d.furnishing,d.living,c.name as client_name,ag.name as agent,
 											d.post_status,d.lost_case,d.hold,d.interested_villa
 											
@@ -205,6 +226,8 @@ class Inquiries extends CI_Controller{
 											where d.id="'.$id.'"');
 		$data['rental_budget'] = $this->rental_budget;
 		$data['sale_budget'] = $this->sale_budget;
+		$data['rental_budget'] = $this->rental_budget;
+		$data['monthly_budget'] = $this->monthly_budget;
 		$data['areas'] = $this->area->get_area_basedon_inquiry($id,true);
 		$this->load->view('theme/inquiries-view-detail',$data);
 	}
@@ -212,21 +235,15 @@ class Inquiries extends CI_Controller{
 	public function get_budget(){
 		if($_POST['type']=='0'){
 			echo form_dropdown('budget[]',$this->rental_budget,'','class="form-control" id="budget" multiple="multiple"');
-		}else{
+		}elseif($_POST['type']=='1'){
 			echo form_dropdown('budget[]',$this->sale_budget,'','class="form-control" id="budget" multiple="multiple"');
+		}else{
+			echo form_dropdown('budget[]',$this->monthly_budget,'','class="form-control" id="budget" multiple="multiple"');
 		}
 	}
 	
 	public function get_hold_living(){
-		if($_POST['type']=='0'){
-			echo '<label>Living: </label>';
-			$opts = array(
-						'0'	=> 'Any Living',
-						'1'	=> 'Open Living',
-						'2'	=> 'Close Living'
-					);
-			echo form_dropdown('living',$opts,'','class="form-control"');
-		}else{
+		if($_POST['type']=='1'){
 			echo '<label>Hold: </label>';
 			$opts = array(
 						'0'	=> 'Any Hold',
@@ -234,6 +251,14 @@ class Inquiries extends CI_Controller{
 						'2'	=> 'Leasehold'
 					);
 			echo form_dropdown('hold',$opts,'','class="form-control"');
+		}else{
+			echo '<label>Living: </label>';
+			$opts = array(
+						'0'	=> 'Any Living',
+						'1'	=> 'Open Living',
+						'2'	=> 'Close Living'
+					);
+			echo form_dropdown('living',$opts,'','class="form-control"');
 		}
 	}
 	
@@ -292,7 +317,7 @@ class Inquiries extends CI_Controller{
 		$status = false;
 		$query = $this->db->query('
 								SELECT ag.email as agent_email,cl.email as client_email,cl.name as client,
-										d.interested_villa, d.inquiry_msg, d.plan_move_in, d.bedroom, d.furnishing,
+										d.interested_villa, d.inquiry_msg, d.plan_move_in, d.plan_move_out, d.bedroom, d.furnishing,
 										d.living, d.plan,d.budget,d.hold
 								FROM fn_deals d
 								INNER JOIN fn_agent ag on ag.id=d.sales_agent
@@ -323,14 +348,15 @@ class Inquiries extends CI_Controller{
 			
 			$additional_msg = '';
 			if(!empty($q->plan_move_in)) $additional_msg .= '<p>Move in date : '.$q->plan_move_in.'</p>';
+			if($q->plan_move_out!='0000-00-00') $additional_msg .= '<p>Check-out date : '.$q->plan_move_out.'</p>';
 			
 			$budgets_list = array();
 			$additional_msg .= '<p>Plan : '; 
-			if($q->plan=='0'){
-				$additional_msg .= 'Rent</p>';
-				$budgets_list = $this->rental_budget;
+			if($q->plan=='0' || $q->plan=='2'){
+				$additional_msg .= ($q->plan=='0') ? 'Rent</p>' : 'Monthly</p>';
+				$budgets_list = ($q->plan=='0') ? $this->rental_budget : $this->monthly_budget;
 				$cc = 'info@balilongtermrentals.com';
-				//if(!empty($q->living)){
+				
 				$additional_msg .= '<p>Living : ';
 				switch ($q->living){
 					case '1'	: $additional_msg .= 'Open Living';
@@ -343,12 +369,10 @@ class Inquiries extends CI_Controller{
 					break;
 				}
 				$additional_msg .= '</p>';
-				//}
 			}else{
 				$additional_msg .= 'Buy</p>';
 				$budgets_list = $this->sale_budget;
 				$cc = 'info@balivillasales.com';
-				//if(!empty($q->hold)){
 				$additional_msg .= '<p>Hold : ';
 				switch ($q->hold){
 					case '1'	: $additional_msg .= 'Freehold';
@@ -361,7 +385,6 @@ class Inquiries extends CI_Controller{
 					break;
 				}
 				$additional_msg .= '</p>';
-				//}
 			}
 			
 			if(!empty($q->budget)){
@@ -374,7 +397,7 @@ class Inquiries extends CI_Controller{
 			}
 			
 			if(!empty($q->bedroom)) $additional_msg .= '<p>Bedrooms : '.$q->bedroom.'</p>';
-			//if(!empty($q->furnishing)){
+			
 			$additional_msg .= '<p>Furnishing : ';
 			switch ($q->furnishing){
 				case '1'	: $additional_msg .= 'Furnished';
@@ -390,7 +413,6 @@ class Inquiries extends CI_Controller{
 				break;
 			}
 			$additional_msg .= '</p>';
-			//}
 			
 			$preferable_areas = $this->area->get_area_basedon_inquiry($id,true);
 			if(!empty($preferable_areas)) $additional_msg .= '<p>Preferable Areas : '.implode(', ',$preferable_areas).'</p>';
@@ -424,8 +446,13 @@ class Inquiries extends CI_Controller{
 		$date = new DateTime($data['plan_move_in'].' 00:00:00');
 		$data['plan_move_in'] = $date->format('Y-m-d');
 		
-		$data['post_status'] = 'Prospect';
+		if($data['plan_move_out']!='0000-00-00'){
+			$date = new DateTime($data['plan_move_out'].' 00:00:00');
+			$data['plan_move_out'] = $date->format('Y-m-d');
+		}
 		
+		$data['post_status'] = 'Prospect';
+		$data['interested_villa'] = stripslashes($data['interested_villa']);
 		$client_data['name'] = $data['client'];
 		$client_data['email'] = $_POST['email'];
 		$client_data['phone'] = $_POST['phone'];

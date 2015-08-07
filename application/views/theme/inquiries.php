@@ -27,7 +27,7 @@ if($show=='form'){
 					<div class="col-sm-4">
 						<label>Plan: </label>
 						<?php
-							echo form_dropdown('plan',array('Rent','Buy'),$plan,'id="plan" class="form-control" required');
+							echo form_dropdown('plan',array('Rent','Buy','Monthly'),$plan,'id="plan" class="form-control" required');
 						?>
 					</div>
 				</div>
@@ -71,6 +71,10 @@ if($show=='form'){
 				</div>
 				
 				<div class="row secions">
+					<div class="col-sm-4" id="planmoveout" <?php echo ($plan!=2) ? 'style="display:none;"' : ''; ?>>
+						<label>Plan Move out: </label>
+						<input type="text" class="form-control datepicker" name="plan_move_out" value="<?php echo $plan_move_out; ?>">
+					</div>
 					<div class="col-sm-4">
 						<label>Furnishing: </label>
 						<?php
@@ -117,7 +121,7 @@ if($show=='form'){
 								$villas = implode(',',$interested_villa['villacode']);
 							}
 						?>
-						<input type="text" class="form-control" name="interested_villa" value="<?php echo $villas; ?>">
+						<input type="text" class="form-control" name="interested_villa" value="<?php echo $villas; ?>" placeholder="ex. CA0025Y, UM0250Y, CA0120Y">
 					</div>
 					
 				</div>

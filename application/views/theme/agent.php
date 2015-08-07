@@ -67,7 +67,9 @@ if($show=='form'){
 			<div class="dataTable_wrapper">
 				<div class="row"><?php echo $tabel; ?></div>
 				<div class="row text-right">
-					<?php echo $page; ?>
+					<div class="paging">
+						<?php echo $page; ?>
+					</div>
 				</div>
 			</div>
 		</div>

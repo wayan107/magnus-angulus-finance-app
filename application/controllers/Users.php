@@ -88,7 +88,7 @@
 			$field='username,email,display_name,role';
 			$query=$this->db->query("select id,$field from ".$this->tabel." limit $offset , ".$this->limit);
 			
-			$data['page']=$this->myci->page($this->tabel,$this->limit,$this->controller,4);
+			$data['page']=$this->myci->page($this->tabel,$this->limit,$this->controller,3);
 			$data['show']='data';
 			$data['_page_title'] = 'Users';
 			$data['tabel']=$this->myci->table_admin($query,$field,$field,$this->controller,$this->primary);

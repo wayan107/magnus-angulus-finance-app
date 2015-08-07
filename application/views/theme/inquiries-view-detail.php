@@ -16,11 +16,26 @@
 			</div>
 			<div class="col-sm-2">
 				<h3>Plan</h3>
-				<p><?php echo ($dt['plan']=='0') ? 'Rent' : 'Buy'; ?></p>
+				<p><?php //echo ($dt['plan']=='0') ? 'Rent' : 'Buy'; 
+					if($dt['plan']=='0'){
+						echo 'Rent';
+					}elseif($dt['plan']=='1'){
+						echo 'Buy';
+					}else{
+						echo 'Monthly';
+					}?></p>
 			</div>
 			<div class="col-sm-2">
 				<h3>Budget</h3>
-				<p><?php $budget_list = ($dt['plan']=='0') ? $rental_budget : $sale_budget; 
+				<p><?php
+					if($dt['plan']=='0'){
+						$budget_list = $rental_budget;
+					}elseif($dt['plan']=='1'){
+						$budget_list = $sale_budget;
+					}else{
+						$budget_list = $monthly_budget;
+					}
+					//$budget_list = ($dt['plan']=='0') ? $rental_budget : $sale_budget; 
 					if(!empty($dt['budget'])){
 					$budgets = explode(',',$dt['budget']);
 						foreach($budgets as $budget){
@@ -39,8 +54,11 @@
 		
 		<div class="row secions">
 			<div class="col-sm-2">
-				<h3>Plan Move In</h3>
-				<p><?php echo $dt['plan_move_in']; ?></p>
+				<h3><?php echo ($dt['plan']==2) ? 'Move Plan' : 'Plan Move In'; ?></h3>
+				<p><?php if($dt['plan']==2){
+							echo 'In : '.$dt['plan_move_in'].'<br>';
+							echo 'Out : '.$dt['plan_move_out'];
+						} else echo $dt['plan_move_in']; ?></p>
 			</div>
 			<div class="col-sm-2">
 				<h3>Bedroom</h3>

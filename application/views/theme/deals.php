@@ -469,12 +469,14 @@ if($show=='form'){
 			</div>
 		</div>
 		<!-- /.panel-body -->
+		<?php if($this->myci->user_role=='admin'){ ?>
 		<div class="panel-footer">
 			<div class="text-right">
 				<a href="<?php echo base_url(); ?>deals/import" class="btn btn-primary">Import Deal Data</a>
 				<a href="<?php echo base_url(); ?>deals/importpaymentplan" class="btn btn-primary">Import Payment Plan Data</a>
 			</div>
 		</div>
+		<?php } ?>
 	</div>
 	<?php
 }

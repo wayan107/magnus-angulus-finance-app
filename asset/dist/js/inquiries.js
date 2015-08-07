@@ -1,5 +1,10 @@
 $(function() {
     $("#plan").change(function(){
+		if($(this).val()=='2'){
+			$('#planmoveout').show();
+		}else{
+			$('#planmoveout').hide();
+		}
 		$.ajax({
 			type	: 'POST',
 			url		: baseurl+'inquiries/get_hold_living',
