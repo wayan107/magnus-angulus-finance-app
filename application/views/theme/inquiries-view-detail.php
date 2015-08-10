@@ -135,6 +135,7 @@
 							$vlink ='';
 							foreach($villas['villalink'] as $link){
 								$vlink .= '<a href="'.$link.'" target="_blank">'.$villas['villacode'][$index].'</a>, ';
+								$index++;
 							}
 							echo substr($vlink,0,strlen($vlink)-2);
 						}else{
