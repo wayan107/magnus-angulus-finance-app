@@ -125,7 +125,7 @@
 			<?php } ?>
 			
 			<div class="col-sm-4">
-				<h3>Interested Villas</h3>
+				<h3>Interested in Villas</h3>
 				<p>
 					<?php
 					if(!empty($dt['interested_villa'])){
@@ -156,6 +156,11 @@
 					}
 					?>
 				</ul>
+			</div>
+			
+			<div class="col-sm-4">
+				<h3>Customer Message</h3>
+				<p><?php echo $dt['inquiry_msg']; ?></p>
 			</div>
 		</div>
 		<?php

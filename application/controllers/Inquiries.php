@@ -218,7 +218,7 @@ class Inquiries extends CI_Controller{
 	public function viewdetail($id){
 		$data['query']=$this->db->query('select d.inquiry_date,d.budget,d.plan,d.plan_move_in,plan_move_out,d.bedroom,
 											d.furnishing,d.living,c.name as client_name,ag.name as agent,
-											d.post_status,d.lost_case,d.hold,d.interested_villa
+											d.post_status,d.lost_case,d.hold,d.interested_villa,d.inquiry_msg
 											
 											from fn_deals d
 											inner join fn_client c on c.id=d.client
@@ -452,6 +452,9 @@ class Inquiries extends CI_Controller{
 		}
 		
 		$data['post_status'] = 'Prospect';
+		if($data['plan']=='2'){
+			$data['rental_type'] = 1;
+		}
 		$data['interested_villa'] = stripslashes($data['interested_villa']);
 		$client_data['name'] = $data['client'];
 		$client_data['email'] = $_POST['email'];
