@@ -57,6 +57,7 @@ $(function() {
 		$('#submit').click(function(){
 			var id = $(this).attr('rel');
 			var action = $(this).attr('data-action');
+			jQuery('.loading').show();
 			$.ajax({
 				type	: 'POST',
 				url		: action,
@@ -88,7 +89,7 @@ $(function() {
 			if($('#status').val()=='Deal'){
 				dealdate = $('#deal_date').val();
 			}
-			
+			jQuery('.loading').show();
 			$.ajax({
 				type	: 'POST',
 				url		: action,

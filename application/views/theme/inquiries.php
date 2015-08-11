@@ -168,30 +168,32 @@ if($show=='form'){
 	?>
 	<div class="panel panel-default">
 		<div class="panel-heading">
-			<?php echo $add; ?>
-			<div class="<?php echo $filter_class; ?> filter">
-				<form action="<?php echo base_url().$this->uri->segment(1); ?>" method="post">
-				<span id="date-filter-label"><?php if (!empty($_POST['status']) && $_POST['status']=='Deal') echo 'Deal'; else echo 'Inquiry'; ?></span> Date From:
-				<input type="text" class="datepicker" name="date-start" value="<?php if (!empty($_POST['date-start'])) echo $_POST['date-start'];; ?>">
-				to
-				<input type="text" class="datepicker" name="date-end" value="<?php if(!empty($_POST['date-end'])) echo $_POST['date-end']; ?>">
-				<?php
-				
-				if($this->myci->user_role=='sales_manager'){
-					$options=$this->dealsmodel->get_agent_dropdown('Sales Agent','All Agent');
-					$default=(!empty($_POST['agent'])) ? $_POST['agent'] : '';
-					echo form_dropdown('agent',$options,$default);
-				}
+			<div class="row">
+				<div class="col-sm-1"><?php echo $add; ?></div>
+				<div class="col-sm-11 text-right <?php echo $filter_class; ?> filter">
+					<form action="<?php echo base_url().$this->uri->segment(1); ?>" method="post">
+					<span id="date-filter-label"><?php if (!empty($_POST['status']) && $_POST['status']=='Deal') echo 'Deal'; else echo 'Inquiry'; ?></span> Date From:
+					<input type="text" class="datepicker" name="date-start" value="<?php if (!empty($_POST['date-start'])) echo $_POST['date-start'];; ?>">
+					to
+					<input type="text" class="datepicker" name="date-end" value="<?php if(!empty($_POST['date-end'])) echo $_POST['date-end']; ?>">
+					<?php
 					
-				$options = $this->config->item('status_dropdown_list');
-				array_unshift($options,'All Status');
-				$default=(!empty($_POST['status'])) ? $_POST['status'] : '';
-				echo form_dropdown('status',$options,$default,'id="filter-status"');
-				
-				//$search=(!empty($_POST['search'])) ? $_POST['search'] : '';
-				?>
-				<input type="submit" class="btn btn-primary" name="filter" value="Submit"/>
-				</form>
+					if($this->myci->user_role=='sales_manager'){
+						$options=$this->dealsmodel->get_agent_dropdown('Sales Agent','All Agent');
+						$default=(!empty($_POST['agent'])) ? $_POST['agent'] : '';
+						echo form_dropdown('agent',$options,$default);
+					}
+						
+					$options = $this->config->item('status_dropdown_list');
+					array_unshift($options,'All Status');
+					$default=(!empty($_POST['status'])) ? $_POST['status'] : '';
+					echo form_dropdown('status',$options,$default,'id="filter-status"');
+					
+					//$search=(!empty($_POST['search'])) ? $_POST['search'] : '';
+					?>
+					<input type="submit" class="btn btn-primary" name="filter" value="Submit"/>
+					</form>
+				</div>
 			</div>
 		</div>
 		<!-- /.panel-heading -->
