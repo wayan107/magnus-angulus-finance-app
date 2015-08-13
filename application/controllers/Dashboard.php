@@ -21,7 +21,10 @@ class Dashboard extends CI_Controller {
 			$data['money_in'] = $this->money('in');
 			$data['money_on_going'] = $this->money('on');
 			$data['datasales'] = $this->get_sales_graph_data(true);
+			$data['datainquiry'] = $this->get_inquiry_graph_data(true);
+			$data['inquiryanddeal'] = $this->inquiryanddeal();
 			$this->myci->display_adm('theme/dashboard',$data);
+			
 		}
 	}
 	
@@ -121,5 +124,92 @@ class Dashboard extends CI_Controller {
 			return json_encode($query->result_array());
 		else
 			echo json_encode($query->result_array());
+	}
+	
+	function get_inquiry_graph_data($return=false){
+		if(empty($_POST['year'])){
+			$year = date('Y');
+		}else{
+			$year = $_POST['year'];
+		}
+		$query = $this->db->query('
+					SELECT (CASE EXTRACT(MONTH FROM inquiry_date)
+								WHEN 1 THEN "Jan"
+								WHEN 2 THEN "Feb"
+								WHEN 3 THEN "Mar"
+								WHEN 4 THEN "Apr"
+								WHEN 5 THEN "May"
+								WHEN 6 THEN "June"
+								WHEN 7 THEN "July"
+								WHEN 8 THEN "Aug"
+								WHEN 9 THEN "Sept"
+								WHEN 10 THEN "Oct"
+								WHEN 11 THEN "Nov"
+								WHEN 12 THEN "Dec"
+							END
+							) as month,
+							COUNT(id) as inquiry
+						FROM fn_deals
+						WHERE EXTRACT(YEAR FROM inquiry_date) = "'.$year.'"
+						GROUP BY month
+						ORDER BY EXTRACT(MONTH FROM inquiry_date)
+				');
+		
+		if($return)
+			return json_encode($query->result_array());
+		else
+			echo json_encode($query->result_array());
+	}
+	
+	function inquiryanddeal(){
+		$month = (int) date('m');
+		$query = $this->db->query('
+					SELECT
+						(
+							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM deal_date)="'.$month.'"
+						) as deal,
+						(
+							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'"
+						) as inquiry,
+						ag.name as agent
+					FROM fn_agent ag
+					WHERE occupation="Sales Agent" or occupation="Sales manager"
+				');
+		return json_encode($query->result_array());
+	}
+	
+	public function openincomedetails(){
+		$month = date('m');
+		$query = $this->db->query('
+					SELECT d.deal_date, CONCAT(consult_fee_currency," ",CAST(FORMAT(consult_fee,0) as CHAR)) as consult_fee,
+							a.name as agent,c.name as client,o.name as owner, d.rental_type, d.rental_duration
+					FROM fn_deals d
+					INNER JOIN fn_client c on c.id=d.client
+					INNER JOIN fn_owner o on o.id=d.owner
+					INNER JOIN fn_agent a on a.id=d.sales_agent
+					WHERE EXTRACT(MONTH FROM d.deal_date) = "'.$month.'"
+				');
+		$data['query']=$query->result_array();
+		$this->load->view('theme/incomedetails',$data);
+	}
+	
+	public function openmoneyindetails($type){
+		$month = date('m');
+		if($type){
+			$where = ' and EXTRACT(MONTH FROM pp.pay_date) = "'.$month.'"';
+		}
+		$query = $this->db->query('
+					SELECT pp.pay_date, pp.date, CONCAT(payment_currency," ",CAST(FORMAT(paid_amount,0) as CHAR)) as paid_amount,
+							CONCAT(currency," ",CAST(FORMAT(amount,0) as CHAR)) as amount,
+							a.name as agent,c.name as client,o.name as owner
+					FROM fn_payment_plan pp
+					INNER JOIN fn_deals d on d.id=pp.deal_id
+					INNER JOIN fn_client c on c.id=d.client
+					INNER JOIN fn_owner o on o.id=d.owner
+					INNER JOIN fn_agent a on a.id=d.sales_agent
+					WHERE pp.paid="'.$type.'" and pp.type="fee"'. $where);
+		$data['query']=$query->result_array();
+		$data['type'] = $type;
+		$this->load->view('theme/moneyindetails',$data);
 	}
 }

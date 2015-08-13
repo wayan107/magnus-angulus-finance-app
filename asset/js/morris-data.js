@@ -1,11 +1,37 @@
 $(function() {
-    var salesChart = Morris.Area({
+    var salesChart = Morris.Line({
         element: 'morris-area-chart',
         data: salesData,
         xkey: 'month',
         ykeys: ['sales', 'income'],
         labels: ['Sales', 'Income'],
 		xLabels: 'month',
+        pointSize: 5,
+        hideHover: 'auto',
+        resize: true,
+		parseTime: false
+    });
+	
+	var inquiryChart = Morris.Line({
+        element: 'inquiry-area-chart',
+        data: inquiryData,
+        xkey: 'month',
+        ykeys: ['inquiry'],
+        labels: ['Inquiry'],
+		xLabels: 'month',
+        pointSize: 5,
+        hideHover: 'auto',
+        resize: true,
+		parseTime: false
+    });
+	
+	var inquiryAndDeal = Morris.Line({
+        element: 'inquiryanddeal-area-chart',
+        data: inquiryanddealData,
+        xkey: 'agent',
+        ykeys: ['inquiry','deal'],
+        labels: ['Inquiry','Deal'],
+		xLabels: 'agent',
         pointSize: 5,
         hideHover: 'auto',
         resize: true,
@@ -27,57 +53,19 @@ $(function() {
 		});
 	});
 	
-    /*Morris.Donut({
-        element: 'morris-donut-chart',
-        data: [{
-            label: "Download Sales",
-            value: 12
-        }, {
-            label: "In-Store Sales",
-            value: 30
-        }, {
-            label: "Mail-Order Sales",
-            value: 20
-        }],
-        resize: true
-    });*/
-
-   /* Morris.Bar({
-        element: 'morris-bar-chart',
-        data: [{
-            y: '2006',
-            a: 100,
-            b: 90
-        }, {
-            y: '2007',
-            a: 75,
-            b: 65
-        }, {
-            y: '2008',
-            a: 50,
-            b: 40
-        }, {
-            y: '2009',
-            a: 75,
-            b: 65
-        }, {
-            y: '2010',
-            a: 50,
-            b: 40
-        }, {
-            y: '2011',
-            a: 75,
-            b: 65
-        }, {
-            y: '2012',
-            a: 100,
-            b: 90
-        }],
-        xkey: 'y',
-        ykeys: ['a', 'b'],
-        labels: ['Series A', 'Series B'],
-        hideHover: 'auto',
-        resize: true
-    });*/
+	jQuery('#inquiry-year-period').change(function(){
+		var year = jQuery(this).val();
+		jQuery('.inquiry-loading-layer').addLoadingLayer();
+		jQuery.ajax({
+			type	: 'POST',
+			url		: baseurl+'dashboard/get_inquiry_graph_data',
+			data	: {'year':year},
+			success	: function(e){
+				inquiryData = JSON.parse(e);
+				inquiryChart.setData(inquiryData);
+				jQuery('.inquiry-loading-layer').removeLoadingLayer();
+			}
+		});
+	});
 
 });

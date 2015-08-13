@@ -12,7 +12,7 @@
 					</div>
 				</div>
 			</div>
-			<a href="<?php echo base_url() ?>deals/">
+			<a class="dashboard-see-details" href="<?php echo base_url() ?>dashboard/openincomedetails">
 				<div class="panel-footer">
 					<span class="pull-left">View Details</span>
 					<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -34,7 +34,7 @@
 					</div>
 				</div>
 			</div>
-			<a href="#">
+			<a class="dashboard-see-details" href="<?php echo base_url() ?>dashboard/openmoneyindetails/1">
 				<div class="panel-footer">
 					<span class="pull-left">View Details</span>
 					<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -56,7 +56,7 @@
 					</div>
 				</div>
 			</div>
-			<a href="#">
+			<a class="dashboard-see-details" href="<?php echo base_url() ?>dashboard/openmoneyindetails/0">
 				<div class="panel-footer">
 					<span class="pull-left">View Details</span>
 					<span class="pull-right"><i class="fa fa-arrow-circle-right"></i></span>
@@ -68,10 +68,10 @@
 </div>
 
 <div class="row">
-	<div class="col-sm-8">
+	<div class="col-sm-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<i class="fa fa-bar-chart-o fa-fw"></i> Sales Graph
+				<i class="fa fa-bar-chart-o fa-fw"></i> Sales Stat
 				<div class="pull-right">
 					<div class="btn-group">
 						<select id="year-period">
@@ -89,6 +89,42 @@
 			<!-- /.panel-heading -->
 			<div class="loading-layer panel-body">
 				<div id="morris-area-chart"></div>
+			</div>
+			<!-- /.panel-body -->
+		</div>
+		
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<i class="fa fa-bar-chart-o fa-fw"></i> Inquiry Vs Deal
+			</div>
+			<!-- /.panel-heading -->
+			<div class="inquiry-loading-layer panel-body">
+				<div id="inquiryanddeal-area-chart"></div>
+			</div>
+			<!-- /.panel-body -->
+		</div>
+	</div>
+	<div class="col-sm-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<i class="fa fa-bar-chart-o fa-fw"></i> Inquiry Stat
+				<div class="pull-right">
+					<div class="btn-group">
+						<select id="inquiry-year-period">
+							<?php 
+								for($i=2015;$i>=2014;$i--){
+									?>
+									<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
+									<?php
+								}
+							?>
+						</select>
+					</div>
+				</div>
+			</div>
+			<!-- /.panel-heading -->
+			<div class="inquiry-loading-layer panel-body">
+				<div id="inquiry-area-chart"></div>
 			</div>
 			<!-- /.panel-body -->
 		</div>

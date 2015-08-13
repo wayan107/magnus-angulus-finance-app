@@ -82,6 +82,12 @@
 		<script>
 			var salesData = '<?php echo $datasales; ?>';
 			salesData = JSON.parse(salesData);
+			
+			var inquiryData = '<?php echo $datainquiry; ?>';
+			inquiryData = JSON.parse(inquiryData);
+			
+			var inquiryanddealData = '<?php echo $inquiryanddeal; ?>';
+			inquiryanddealData = JSON.parse(inquiryanddealData);
 		</script>
 		 <!-- Morris Charts JavaScript -->
 		<script src="<?php echo base_url(); ?>asset/bower_components/raphael/raphael-min.js"></script>

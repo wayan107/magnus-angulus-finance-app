@@ -434,4 +434,30 @@ jQuery(document).ready(function(){
 		}, 1500 );
 		
 	}
+	
+	jQuery('#rental-type').change(function(){
+		if(jQuery(this).val()==2){
+			jQuery('#rental-duration').attr('disabled','disabled');
+		}else{
+			jQuery('#rental-duration').removeAttr('disabled');
+		}
+	});
+	
+	jQuery('.dashboard-see-details').click(function(e){
+		e.preventDefault();
+		var tourl = jQuery(this).attr('href');
+		jQuery.ajax({
+				url		: tourl,
+				success	: function(e){
+					jQuery('body').append(e);
+					dashboardDetailButton();
+				}
+			});
+	});
+	
+	function dashboardDetailButton(){
+		jQuery('#pop-up-window .close').click(function(){
+			jQuery('#pop-up-window').remove();
+		});
+	}
 });

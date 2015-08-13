@@ -167,7 +167,9 @@ if($show=='form'){
 						<?php
 							$options=array(
 											'0'	=> 'Yearly',
-											'1' => 'Monthly'
+											'1' => 'Monthly',
+											'2'	=> 'Freehold',
+											'3'	=> 'Leasehold'
 										);
 							echo form_dropdown('rental_type',$options,$rental_type,'id="rental-type" class="form-control"');
 						?>
@@ -233,7 +235,7 @@ if($show=='form'){
 											'11'	=> '11',
 											'12'	=> '12'
 										);
-							echo form_dropdown('rental_duration',$options,$rental_duration,'class="form-control"');
+							echo form_dropdown('rental_duration',$options,$rental_duration,'class="form-control" id="rental-duration" disable');
 						?>
 					</div>
 				</div>
