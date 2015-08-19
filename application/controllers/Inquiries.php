@@ -151,8 +151,8 @@ class Inquiries extends CI_Controller{
 		$data['filter_class'] = ($this->myci->user_role=='sales_manager') ? 'pull-right' : '';
 		$field='inquiry_date,plan_move_in,ag.name as agent,post_status,ag.id as agent_id,
 				(CASE
-					WHEN plan="0" THEN "Rent"
-					WHEN plan="1" THEN "Buy"
+					WHEN plan="0" THEN "Yearly"
+					WHEN plan="1" THEN "Sale"
 					WHEN plan="2" THEN "Monthly"
 				END) as plan';
 		$data['_page_title'] = $this->page_name;
@@ -196,7 +196,7 @@ class Inquiries extends CI_Controller{
 			}
 		}
 		
-		$select = "select fn_deals.id,$field,c.name as client_name,c.id as client_id";
+		$select = "select fn_deals.id,$field,c.name as client_name,c.id as client_id,fn_deals.budget,fn_deals.plan as planint";
 		$sql = " from ".$this->tabel."
 				inner join fn_client c on c.id=fn_deals.client
 				left join fn_agent ag on ag.id=fn_deals.sales_agent
@@ -209,12 +209,17 @@ class Inquiries extends CI_Controller{
 		$q_page = $this->db->query('select count(fn_deals.id) as total_rows'.$sql);
 		$q_page = $q_page->row();
 		
-		$table_header='Inquiry Date,Client,Plan,Plan Move in,Assigned To,Last Status';
-		$field='inquiry_date,client_name,plan,plan_move_in,agent,post_status';
+		$table_header='Inquiry Date,Client,Plan,Budget,Plan Move in,Assigned To,Last Status';
+		$field='inquiry_date,client_name,plan,budget,plan_move_in,agent,post_status';
 		
+		$budgets = array(
+						$this->rental_budget,
+						$this->sale_budget,
+						$this->monthly_budget
+					);
 		$data['page']=$this->myci->page2($q_page->total_rows,$this->limit,$this->controller,3);
 		$data['show']='data';
-		$data['tabel']=$this->myci->table_inquiry($query,$field,$table_header,$this->controller,$this->primary,true);
+		$data['tabel']=$this->myci->table_inquiry($query,$field,$table_header,$this->controller,$this->primary,true,$budgets);
 		$data['export_params'] = $export_params;
 		$this->myci->display_adm('theme/'.$this->view,$data);
 	}

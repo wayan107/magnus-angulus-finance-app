@@ -382,7 +382,7 @@ class Myci{
 			
 	}
 	
-	function table_inquiry($query,$field='',$as='',$controller,$primary,$see_details=false){
+	function table_inquiry($query,$field='',$as='',$controller,$primary,$see_details=false,$budgets){
 			$this->ci->load->library('table');
 			$tmpl = array (
                     'table_open'          => '<table border="0" class="table table-striped table-bordered table-hover data-table">',
@@ -437,6 +437,13 @@ class Myci{
 						$item_row[$i+1]=$tcell;
 					}elseif($fields[$i]=='client_name'){
 						$item_row[$i+1] = '<a class="client-details" href="'.base_url().'client/details/'.$dts['client_id'].'">'.$dts['client_name'].'</a>';
+					}elseif($fields[$i]=='budget'){
+						$client_budgets = explode(',',$dts['budget']);
+						$b = array();
+						foreach($client_budgets as $cb){
+							$b[] = $budgets[$dts['planint']][$cb];
+						}
+						$item_row[$i+1] = implode('<br> ',$b);
 					}else
 					$item_row[$i+1]=$dts[$fields[$i]];
 				}
