@@ -92,5 +92,12 @@ class Client extends CI_Controller{
 		$data['tabel']=$this->myci->table_admin($query,$field,$field,$this->controller,$this->primary);
 		$this->myci->display_adm('theme/'.$this->view,$data);
 	}
+	
+	public function details($id){
+		$query = $this->db->query('
+							SELECT name,phone,email FROM fn_client WHERE id="'.$id.'"
+						');
+		$this->load->view('theme/client-detail',array('query'=>$query));
+	}
 }
 ?>

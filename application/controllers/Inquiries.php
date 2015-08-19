@@ -190,9 +190,13 @@ class Inquiries extends CI_Controller{
 					$export_params .= '&post_status='.$this->input->post('status');
 				}
 			}
+			
+			if(!empty($_POST['s'])){
+				$where .= ' and c.name like "%'.$_POST['s'].'%"';
+			}
 		}
 		
-		$select = "select fn_deals.id,$field,c.name as client_name";
+		$select = "select fn_deals.id,$field,c.name as client_name,c.id as client_id";
 		$sql = " from ".$this->tabel."
 				inner join fn_client c on c.id=fn_deals.client
 				left join fn_agent ag on ag.id=fn_deals.sales_agent
@@ -342,7 +346,8 @@ class Inquiries extends CI_Controller{
 				
 				$msg .= '<p>Interested Villa : '.substr($villalink,0,strlen($villalink)-2).'</p>';
 				if(!empty($interested_villas['price'])){
-					$msg .= '<p>Price :'.implode(', ',$interested_villas['price']).'</p>';
+					$price = (is_array($interested_villas['price'])) ? implode(', ',$interested_villas['price']) : $interested_villas['price'];
+					$msg .= '<p>Price :'.$price.'</p>';
 				}
 			}
 			

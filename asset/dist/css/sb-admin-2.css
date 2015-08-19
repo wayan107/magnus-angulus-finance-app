@@ -597,7 +597,7 @@ span.status-on-going i {
   color: yellow;
 }
 
-#year-period {
+.year-period {
   height: 25px;
   padding: 0px 5px;
   cursor: pointer;
@@ -725,4 +725,8 @@ display:none;
 
 .inputclass {
     padding: 5px 10px;
+}
+#popular-area {
+    width: 500px;
+    height: 450px;
 }

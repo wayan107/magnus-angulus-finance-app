@@ -23,6 +23,7 @@ class Dashboard extends CI_Controller {
 			$data['datasales'] = $this->get_sales_graph_data(true);
 			$data['datainquiry'] = $this->get_inquiry_graph_data(true);
 			$data['inquiryanddeal'] = $this->inquiryanddeal();
+			$data['popularareadata'] = $this->getpopularareadata();
 			$this->myci->display_adm('theme/dashboard',$data);
 			
 		}
@@ -127,13 +128,36 @@ class Dashboard extends CI_Controller {
 	}
 	
 	function get_inquiry_graph_data($return=false){
-		if(empty($_POST['year'])){
-			$year = date('Y');
+		if(empty($_POST['period'])){
+			$period = 'day';
 		}else{
-			$year = $_POST['year'];
+			$period = $_POST['period'];
 		}
-		$query = $this->db->query('
-					SELECT (CASE EXTRACT(MONTH FROM inquiry_date)
+		$date = new DateTime();
+		$today = $date->format('Y-m-d');
+		$date->modify('last month');
+		$last_month = $date->format('Y-m-d');
+		$sql='';
+		
+		if($period=='day'){
+			$sql='SELECT inquiry_date as month, COUNT(id) as inquiry
+					FROM fn_deals
+					WHERE inquiry_date between "'.$last_month.'" and "'.$today.'"
+					GROUP BY inquiry_date
+					ORDER BY inquiry_date ASC';
+					
+		}elseif($period=='week'){
+			$weeks = $this->getWeeks($last_month,$today);
+			$sql_array = array();
+			foreach($weeks as $week){
+				$sql_array[] ='SELECT "'.$week[0].' - '.$week[1].'" as month, COUNT(id) as inquiry
+								FROM fn_deals
+								WHERE inquiry_date between "'.$week[0].'" and "'.$week[1].'"';
+			}
+			$sql = implode(' UNION ',$sql_array);
+			$sql .= ' GROUP BY month';
+		}else{
+			$sql = 'SELECT (CASE EXTRACT(MONTH FROM inquiry_date)
 								WHEN 1 THEN "Jan"
 								WHEN 2 THEN "Feb"
 								WHEN 3 THEN "Mar"
@@ -150,15 +174,34 @@ class Dashboard extends CI_Controller {
 							) as month,
 							COUNT(id) as inquiry
 						FROM fn_deals
-						WHERE EXTRACT(YEAR FROM inquiry_date) = "'.$year.'"
+						WHERE inquiry_date between "'.$last_month.'" and "'.$today.'"
 						GROUP BY month
-						ORDER BY EXTRACT(MONTH FROM inquiry_date)
-				');
+						ORDER BY EXTRACT(MONTH FROM inquiry_date)';
+		}
+		$query = $this->db->query($sql);
 		
 		if($return)
 			return json_encode($query->result_array());
 		else
 			echo json_encode($query->result_array());
+	}
+	
+	function getWeeks($start_date,$end_date){
+		$weeks = array();
+		$end_date1 = date('Y-m-d', strtotime($end_date.' + 6 days'));
+		for($date = $start_date; $date <= $end_date1; $date = date('Y-m-d', strtotime($date. ' + 7 days'))){
+			//echo getWeekDates($date, $start_date, $end_date);
+			
+			$week =  date('W', strtotime($date));
+			$year =  date('Y', strtotime($date));
+			$from = date("Y-m-d", strtotime("{$year}-W{$week}+0")); //Returns the date of monday in week
+			if($from < $start_date) $from = $start_date;
+			$to = date("Y-m-d", strtotime("{$year}-W{$week}-7"));   //Returns the date of sunday in week
+			if($to > $end_date) $to = $end_date;
+			$weeks[]=array($from,$to);
+		}
+		
+		return $weeks;
 	}
 	
 	function inquiryanddeal(){
@@ -171,11 +214,22 @@ class Dashboard extends CI_Controller {
 						(
 							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'"
 						) as inquiry,
+						(
+							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'" and post_status="Inspection"
+						) as inspection,
 						ag.name as agent
 					FROM fn_agent ag
-					WHERE occupation="Sales Agent" or occupation="Sales manager"
+					WHERE (occupation="Sales Agent" or occupation="Sales manager") and ag.id<>13
 				');
-		return json_encode($query->result_array());
+		//return json_encode($query->result_array());
+		$return=array();
+		foreach($query->result_array() as $q){
+			$return['agent'][]=$q['agent'];
+			$return['deal'][]=(int)$q['deal'];
+			$return['inquiry'][]=(int)$q['inquiry'];
+			$return['inspection'][]=(int)$q['inspection'];
+		}
+		return json_encode($return);
 	}
 	
 	public function openincomedetails(){
@@ -211,5 +265,26 @@ class Dashboard extends CI_Controller {
 		$data['query']=$query->result_array();
 		$data['type'] = $type;
 		$this->load->view('theme/moneyindetails',$data);
+	}
+	
+	function getpopularareadata(){
+		$month = date('m');
+		$query = $this->db->query('
+							SELECT COUNT(pa.area_code) as data, a.name as area
+							FROM fn_areas_prefer pa
+							INNER JOIN fn_deals d on d.id=pa.deal_id
+							INNER JOIN fn_area a on a.prefix=pa.area_code
+							WHERE EXTRACT(MONTH FROM d.inquiry_date) = "'.$month.'"
+							GROUP BY pa.area_code
+						');
+		$dataReturn = array();
+		foreach($query->result_array() as $d){
+			$dataReturn[] = array(
+								'label'	=> $d['area'],
+								'data'	=> (int)$d['data']
+							);
+		}
+		
+		return json_encode($dataReturn);
 	}
 }

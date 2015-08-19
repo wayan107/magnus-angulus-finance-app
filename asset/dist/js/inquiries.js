@@ -112,4 +112,18 @@ $(function() {
 		}
 		jQuery('#date-filter-label').html(text);
 	});
+	
+	jQuery('.client-details').click(function(e){
+		e.preventDefault();
+		var toUrl = jQuery(this).attr('href');
+		$.ajax({
+			url		: toUrl,
+			success	: function(e){
+				jQuery('body').append(e);
+				jQuery('#pop-up-window .close').click(function(){
+					jQuery('#pop-up-window').remove();
+				});
+			}
+		});
+	});
 });

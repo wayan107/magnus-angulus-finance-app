@@ -428,18 +428,17 @@ class Myci{
 			$table_row=1+(int)$this->ci->uri->segment(3);
 			
 			foreach($query->result_array() as $dts){
-			
 			//pembuatan baris data dlm bentuk array (data berasal dari dari query)
-
 				$item_row[0]=$table_row; 
 				$table_row++;
 				for($i=0;$i<$jumField;$i++){
 					if($fields[$i]=='post_status'){
 						$tcell = array('data'=>$dts[$fields[$i]],'class'=>$dts[$fields[$i]]);
 						$item_row[$i+1]=$tcell;
+					}elseif($fields[$i]=='client_name'){
+						$item_row[$i+1] = '<a class="client-details" href="'.base_url().'client/details/'.$dts['client_id'].'">'.$dts['client_name'].'</a>';
 					}else
 					$item_row[$i+1]=$dts[$fields[$i]];
-					
 				}
 				
 				if($this->user_role=='sales_manager'){

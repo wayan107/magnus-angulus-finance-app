@@ -68,13 +68,35 @@
 </div>
 
 <div class="row">
-	<div class="col-sm-6">
+	<div class="col-sm-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<i class="fa fa-bar-chart-o fa-fw"></i> Inquiry Stat
+				<div class="pull-right">
+					<div class="btn-group">
+						<select id="inquiry-year-period" class="year-period">
+							<option value="day">Day</option>
+							<option value="week">Week</option>
+							<option value="month">Month</option>
+						</select>
+					</div>
+				</div>
+			</div>
+			<!-- /.panel-heading -->
+			<div class="inquiry-loading-layer panel-body">
+				<div id="inquiry-area-chart"></div>
+			</div>
+			<!-- /.panel-body -->
+		</div>
+	</div>
+	
+	<div class="col-sm-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<i class="fa fa-bar-chart-o fa-fw"></i> Sales Stat
 				<div class="pull-right">
 					<div class="btn-group">
-						<select id="year-period">
+						<select id="year-period" class="year-period">
 							<?php 
 								for($i=2015;$i>=2014;$i--){
 									?>
@@ -93,41 +115,34 @@
 			<!-- /.panel-body -->
 		</div>
 		
+	</div>
+	
+	<div class="col-sm-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<i class="fa fa-bar-chart-o fa-fw"></i> Inquiry Vs Deal
+				<i class="fa fa-bar-chart-o fa-fw"></i> Inquiry vs Deal
+				<div class="pull-right">
+					
+				</div>
 			</div>
 			<!-- /.panel-heading -->
-			<div class="inquiry-loading-layer panel-body">
-				<div id="inquiryanddeal-area-chart"></div>
+			<div class="inquiryvsdeal-loading-layer panel-body">
+				<div id="chart2"></div>
 			</div>
 			<!-- /.panel-body -->
 		</div>
 	</div>
+	
 	<div class="col-sm-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<i class="fa fa-bar-chart-o fa-fw"></i> Inquiry Stat
-				<div class="pull-right">
-					<div class="btn-group">
-						<select id="inquiry-year-period">
-							<?php 
-								for($i=2015;$i>=2014;$i--){
-									?>
-									<option value="<?php echo $i; ?>"><?php echo $i; ?></option>
-									<?php
-								}
-							?>
-						</select>
-					</div>
-				</div>
+				<i class="fa fa-bar-chart-o fa-fw"></i> Area Popularity
 			</div>
 			<!-- /.panel-heading -->
-			<div class="inquiry-loading-layer panel-body">
-				<div id="inquiry-area-chart"></div>
+			<div class="panel-body">
+				<div id="popular-area"></div>
 			</div>
 			<!-- /.panel-body -->
 		</div>
 	</div>
 </div>
-			

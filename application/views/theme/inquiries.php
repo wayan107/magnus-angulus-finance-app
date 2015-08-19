@@ -172,6 +172,7 @@ if($show=='form'){
 				<div class="col-sm-1"><?php echo $add; ?></div>
 				<div class="col-sm-11 text-right <?php echo $filter_class; ?> filter">
 					<form action="<?php echo base_url().$this->uri->segment(1); ?>" method="post">
+					<input type="text" name="s" value="<?php echo (!empty($_POST['s'])) ? $_POST['s'] : ''; ?>" placeholder="Find Client">
 					<span id="date-filter-label"><?php if (!empty($_POST['status']) && $_POST['status']=='Deal') echo 'Deal'; else echo 'Inquiry'; ?></span> Date From:
 					<input type="text" class="datepicker" name="date-start" value="<?php if (!empty($_POST['date-start'])) echo $_POST['date-start'];; ?>">
 					to

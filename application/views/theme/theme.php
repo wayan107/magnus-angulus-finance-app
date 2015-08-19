@@ -77,7 +77,7 @@
     <script src="<?php echo base_url(); ?>asset/dist/js/my-js-small-plugin.js"></script>
 	<script src="<?php echo base_url(); ?>asset/dist/js/jquery.form.js"></script>
 	<script src="<?php echo base_url(); ?>asset/dist/js/sb-admin-2.js"></script>
-
+	
 	<?php if($this->myci->is_home()){ ?>
 		<script>
 			var salesData = '<?php echo $datasales; ?>';
@@ -88,11 +88,26 @@
 			
 			var inquiryanddealData = '<?php echo $inquiryanddeal; ?>';
 			inquiryanddealData = JSON.parse(inquiryanddealData);
+			
+			var popularAreaData = '<?php echo $popularareadata; ?>';
+			popularAreaData = JSON.parse(popularAreaData);
 		</script>
 		 <!-- Morris Charts JavaScript -->
 		<script src="<?php echo base_url(); ?>asset/bower_components/raphael/raphael-min.js"></script>
 		<script src="<?php echo base_url(); ?>asset/bower_components/morrisjs/morris.min.js"></script>
 		<script src="<?php echo base_url(); ?>asset/js/morris-data.js"></script>
+		
+		<link href="<?php echo base_url(); ?>/asset/jqplot/jquery.jqplot.min.css" rel="stylesheet">
+		<script src="<?php echo base_url(); ?>asset/dist/js/dashboard.js"></script>
+		<script src="<?php echo base_url(); ?>asset/jqplot/jquery.jqplot.min.js"></script>
+		<script src="<?php echo base_url(); ?>asset/jqplot/plugins/jqplot.barRenderer.min.js"></script>
+		<script src="<?php echo base_url(); ?>asset/jqplot/plugins/jqplot.pieRenderer.min.js"></script>
+		<script src="<?php echo base_url(); ?>asset/jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+		<script src="<?php echo base_url(); ?>asset/jqplot/plugins/jqplot.pointLabels.min.js"></script>
+		
+		<script language="javascript" type="text/javascript" src="<?php echo base_url(); ?>asset/bower_components/flot/jquery.flot.js"></script>
+		<script language="javascript" type="text/javascript" src="<?php echo base_url(); ?>asset/bower_components/flot/jquery.flot.pie.js"></script>
+		
 	<?php }
 		
 		if(!$this->myci->is_home()){
