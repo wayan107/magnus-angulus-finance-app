@@ -74,6 +74,17 @@
 				<i class="fa fa-bar-chart-o fa-fw"></i> Inquiry Stat
 				<div class="pull-right">
 					<div class="btn-group">
+						<?php
+						$date = new DateTime();
+						$today = $date->format('m/d/Y');
+						$date->modify('last month');
+						$last_month = $date->format('m/d/Y');
+						?>
+						From <input type="text" id="from" class="year-period" name="from" value="<?php echo $last_month; ?>">
+						to <input type="text" id="to" class="year-period" name="to" value="<?php echo $today; ?>">
+					</div>
+					<input type="button" id="inquiry-date-range" class="green-button" value="Apply">
+					<div class="btn-group">
 						<select id="inquiry-year-period" class="year-period">
 							<option value="day">Day</option>
 							<option value="week">Week</option>
@@ -93,7 +104,7 @@
 	<div class="col-sm-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<i class="fa fa-bar-chart-o fa-fw"></i> Sales Stat
+				<i class="fa fa-bar-chart-o fa-fw"></i> Monthly Sales Turnover
 				<div class="pull-right">
 					<div class="btn-group">
 						<select id="year-period" class="year-period">
@@ -117,12 +128,31 @@
 		
 	</div>
 	
-	<div class="col-sm-12">
+	<div class="col-sm-8">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<i class="fa fa-bar-chart-o fa-fw"></i> Inquiry vs Deal
 				<div class="pull-right">
-					
+					<select class="year-period" id="ivd-month">
+						<?php
+						$this_month = (int)date('m');
+						$month = array('Jan','Feb','Mar','Apr','Mey','Jun','Jul','Aug','Sep','Oct','Nov','Des');
+						foreach($month as $key=>$val){
+							?>
+							<option value="<?php echo ($key+1) ?>" <?php echo ($this_month == ($key+1)) ? 'selected' : ''; ?>><?php echo $val; ?></option>
+							<?php
+						}
+						?>
+					</select>
+					<select class="year-period" id="ivd-year">
+						<?php
+						for($i=date('Y'); $i>=2015;$i--){
+							?>
+							<option value="<?php echo $i ?>"><?php echo $i; ?></option>
+							<?php
+						}
+						?>
+					</select>
 				</div>
 			</div>
 			<!-- /.panel-heading -->
@@ -132,11 +162,23 @@
 			<!-- /.panel-body -->
 		</div>
 	</div>
+	<div class="col-sm-4">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<i class="fa fa-bar-chart-o fa-fw"></i> Agent Deal Rate
+			</div>
+			<!-- /.panel-heading -->
+			<div class="dealrate-loading-layer panel-body">
+				<div id="dealrate"></div>
+			</div>
+			<!-- /.panel-body -->
+		</div>
+	</div>
 	
 	<div class="col-sm-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<i class="fa fa-bar-chart-o fa-fw"></i> Area Popularity
+				<i class="fa fa-bar-chart-o fa-fw"></i> Area Popularity In Last 30 Days
 			</div>
 			<!-- /.panel-heading -->
 			<div class="panel-body">

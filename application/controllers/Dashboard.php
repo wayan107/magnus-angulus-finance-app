@@ -22,8 +22,9 @@ class Dashboard extends CI_Controller {
 			$data['money_on_going'] = $this->money('on');
 			$data['datasales'] = $this->get_sales_graph_data(true);
 			$data['datainquiry'] = $this->get_inquiry_graph_data(true);
-			$data['inquiryanddeal'] = $this->inquiryanddeal();
+			$data['inquiryanddeal'] = $this->inquiryanddeal(true);
 			$data['popularareadata'] = $this->getpopularareadata();
+			$data['dealrate'] = $this->dealrate(true);
 			$this->myci->display_adm('theme/dashboard',$data);
 			
 		}
@@ -133,10 +134,19 @@ class Dashboard extends CI_Controller {
 		}else{
 			$period = $_POST['period'];
 		}
-		$date = new DateTime();
-		$today = $date->format('Y-m-d');
-		$date->modify('last month');
-		$last_month = $date->format('Y-m-d');
+		
+		if(!empty($_POST['from']) && !empty($_POST['to'])){
+			$today = new DateTime($_POST['to']. ' 00:00:00');
+			$today = $today->format('Y-m-d');
+			
+			$last_month = new DateTime($_POST['from']. ' 00:00:00');
+			$last_month = $last_month->format('Y-m-d');
+		}else{
+			$date = new DateTime();
+			$today = $date->format('Y-m-d');
+			$date->modify('last month');
+			$last_month = $date->format('Y-m-d');
+		}
 		$sql='';
 		
 		if($period=='day'){
@@ -204,32 +214,71 @@ class Dashboard extends CI_Controller {
 		return $weeks;
 	}
 	
-	function inquiryanddeal(){
-		$month = (int) date('m');
+	function inquiryanddeal($return=false){
+		$month = (empty($_POST['month'])) ? (int)date('m') : $_POST['month'];
+		$year = (empty($_POST['year'])) ? (int)date('Y') : $_POST['year'];
+		
 		$query = $this->db->query('
 					SELECT
 						(
-							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM deal_date)="'.$month.'"
+							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'" and EXTRACT(YEAR FROM inquiry_date)="'.$year.'" and (post_status="Deal" or post_status="Finalized Deal")
 						) as deal,
 						(
-							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'"
+							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'" and EXTRACT(YEAR FROM inquiry_date)="'.$year.'"
 						) as inquiry,
 						(
-							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'" and post_status="Inspection"
+							SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'" and EXTRACT(YEAR FROM inquiry_date)="'.$year.'" and post_status="Inspection"
 						) as inspection,
 						ag.name as agent
 					FROM fn_agent ag
 					WHERE (occupation="Sales Agent" or occupation="Sales manager") and ag.id<>13
 				');
-		//return json_encode($query->result_array());
-		$return=array();
+				
+		$return_data=array();
 		foreach($query->result_array() as $q){
-			$return['agent'][]=$q['agent'];
-			$return['deal'][]=(int)$q['deal'];
-			$return['inquiry'][]=(int)$q['inquiry'];
-			$return['inspection'][]=(int)$q['inspection'];
+			$return_data['agent'][]=$q['agent'];
+			$return_data['deal'][]=(int)$q['deal'];
+			$return_data['inquiry'][]=(int)$q['inquiry'];
+			$return_data['inspection'][]=(int)$q['inspection'];
 		}
-		return json_encode($return);
+		
+		if($return)
+			return json_encode($return_data);
+		else
+			echo json_encode($return_data);
+	}
+	
+	function dealrate($return=false){
+		$month = (empty($_POST['month'])) ? (int)date('m') : $_POST['month'];
+		$year = (empty($_POST['year'])) ? (int)date('Y') : $_POST['year'];
+		
+		$query = $this->db->query('
+			SELECT
+				(
+					SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'" and EXTRACT(YEAR FROM inquiry_date)="'.$year.'" and (post_status="Deal" or post_status="Finalized Deal")
+				) as deal,
+				(
+					SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'" and EXTRACT(YEAR FROM inquiry_date)="'.$year.'"
+				) as inquiry,
+				(
+					SELECT count(id) from fn_deals where sales_agent=ag.id and EXTRACT(MONTH FROM inquiry_date)="'.$month.'" and EXTRACT(YEAR FROM inquiry_date)="'.$year.'" and post_status="Inspection"
+				) as inspection,
+				ag.name as agent
+			FROM fn_agent ag
+			WHERE (occupation="Sales Agent" or occupation="Sales manager") and ag.id<>13
+			ORDER BY deal DESC, inquiry ASC
+		');
+		
+		$return_data = array();
+		foreach($query->result_array() as $q){
+			$return_data['agent'][] = $q['agent'];
+			$return_data['dealrate'][] = (!empty($q['inquiry']) && !empty($q['deal'])) ? (int)$q['inquiry']/(int)$q['deal']*100 : 0;
+		}
+		
+		if($return)
+			return json_encode($return_data);
+		else
+			echo json_encode($return_data);
 	}
 	
 	public function openincomedetails(){

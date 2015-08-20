@@ -22,8 +22,11 @@ class Myci{
 			$query=$this->ci->db->get($tabel);
 			
 			$session_age='86500';
-			if($this->ci->myci->post('remember-me')){
+			$remember_me = $this->ci->myci->post('remember-me');
+			if($remember_me){
 				$session_age='2592000';
+			}else{
+				$session_age='86400';
 			}
 			
 			if($query->num_rows()>0){
@@ -438,12 +441,16 @@ class Myci{
 					}elseif($fields[$i]=='client_name'){
 						$item_row[$i+1] = '<a class="client-details" href="'.base_url().'client/details/'.$dts['client_id'].'">'.$dts['client_name'].'</a>';
 					}elseif($fields[$i]=='budget'){
-						$client_budgets = explode(',',$dts['budget']);
-						$b = array();
-						foreach($client_budgets as $cb){
-							$b[] = $budgets[$dts['planint']][$cb];
+						if(!empty($dts['budget'])){
+							$client_budgets = explode(',',$dts['budget']);
+							$b = array();
+							foreach($client_budgets as $cb){
+								$b[] = $budgets[$dts['planint']][$cb];
+							}
+							$item_row[$i+1] = implode('<br> ',$b);
 						}
-						$item_row[$i+1] = implode('<br> ',$b);
+						else
+							$item_row[$i+1] = '';
 					}else
 					$item_row[$i+1]=$dts[$fields[$i]];
 				}

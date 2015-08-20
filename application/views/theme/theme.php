@@ -91,14 +91,15 @@
 			
 			var popularAreaData = '<?php echo $popularareadata; ?>';
 			popularAreaData = JSON.parse(popularAreaData);
+			
+			var dealrate = '<?php echo $dealrate; ?>';
+			dealrate = JSON.parse(dealrate);
 		</script>
 		 <!-- Morris Charts JavaScript -->
 		<script src="<?php echo base_url(); ?>asset/bower_components/raphael/raphael-min.js"></script>
 		<script src="<?php echo base_url(); ?>asset/bower_components/morrisjs/morris.min.js"></script>
-		<script src="<?php echo base_url(); ?>asset/js/morris-data.js"></script>
 		
 		<link href="<?php echo base_url(); ?>/asset/jqplot/jquery.jqplot.min.css" rel="stylesheet">
-		<script src="<?php echo base_url(); ?>asset/dist/js/dashboard.js"></script>
 		<script src="<?php echo base_url(); ?>asset/jqplot/jquery.jqplot.min.js"></script>
 		<script src="<?php echo base_url(); ?>asset/jqplot/plugins/jqplot.barRenderer.min.js"></script>
 		<script src="<?php echo base_url(); ?>asset/jqplot/plugins/jqplot.pieRenderer.min.js"></script>
@@ -107,7 +108,8 @@
 		
 		<script language="javascript" type="text/javascript" src="<?php echo base_url(); ?>asset/bower_components/flot/jquery.flot.js"></script>
 		<script language="javascript" type="text/javascript" src="<?php echo base_url(); ?>asset/bower_components/flot/jquery.flot.pie.js"></script>
-		
+
+		<script src="<?php echo base_url(); ?>asset/dist/js/dashboard.js"></script>
 	<?php }
 		
 		if(!$this->myci->is_home()){

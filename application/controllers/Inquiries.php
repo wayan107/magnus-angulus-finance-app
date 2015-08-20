@@ -344,6 +344,7 @@ class Inquiries extends CI_Controller{
 					$index=0;
 					foreach($interested_villas['villalink'] as $link){
 						$villalink .= '<a href="'.$link.'" target="_blank">'.$interested_villas['villacode'][$index].'</a>, ';
+						$index++;
 					}
 				}else{
 					$villalink = implode(', ',$interested_villas['villacode']);

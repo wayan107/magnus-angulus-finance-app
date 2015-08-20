@@ -87,7 +87,7 @@
 	</div>
 	<div class="bot">
 		<div class="section left">
-			<input type="checkbox" id="remember" name="remember-me"> <label for="remember">Remember me?</label>
+			<input type="checkbox" value="1" id="remember" name="remember-me"> <label for="remember">Remember me?</label>
 		</div>
 		<div class="section right">
 			<input type="submit" name="login" class="login-button" value="Login">
