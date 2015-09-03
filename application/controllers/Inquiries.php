@@ -346,11 +346,12 @@ class Inquiries extends CI_Controller{
 						$villalink .= '<a href="'.$link.'" target="_blank">'.$interested_villas['villacode'][$index].'</a>, ';
 						$index++;
 					}
+					$villalink = substr($villalink,0,strlen($villalink)-2);
 				}else{
 					$villalink = implode(', ',$interested_villas['villacode']);
 				}
 				
-				$msg .= '<p>Interested Villa : '.substr($villalink,0,strlen($villalink)-2).'</p>';
+				$msg .= '<p>Interested Villa : '.$villalink.'</p>';
 				if(!empty($interested_villas['price'])){
 					$price = (is_array($interested_villas['price'])) ? implode(', ',$interested_villas['price']) : $interested_villas['price'];
 					$msg .= '<p>Price :'.$price.'</p>';
