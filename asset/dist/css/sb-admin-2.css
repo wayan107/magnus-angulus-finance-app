@@ -8,6 +8,8 @@ body {
     background-color: #f8f8f8;
 }
 
+.loading,.send-button-group{display:none;}
+
 #wrapper {
     width: 100%;
 }
@@ -737,4 +739,11 @@ display:none;
     border: 0;
     color: #fafafa;
     padding: 2px 10px;
+}
+
+#preview {
+    width: 670px;
+    margin: 20px auto;
+    border: 1px solid;
+	display:none;
 }

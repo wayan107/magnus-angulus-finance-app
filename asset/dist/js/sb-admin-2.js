@@ -388,12 +388,43 @@ jQuery(document).ready(function(){
 		}
 	}
 	
-	jQuery('#sendemailblast').click(function(){
-		runProggress();
+	jQuery('#preview-email').click(function(){
+		jQuery('.loading-preview').show();
+		jQuery('#preview').hide();
 		jQuery.ajax({
 			url		: baseurl+'emailblast/sendemail',
 			type	: 'POST',
-			data	: {'plan':jQuery('#plan').val()},
+			data	: {'plan':jQuery('#plan').val(),'preview':'1','test':''},
+			success	: function(e){
+				jQuery('#preview').show();
+				jQuery('#preview').html(e);
+				jQuery('.send-button-group').show();
+				jQuery('.loading-preview').hide();
+			}
+		});
+	});
+	
+	jQuery('#test-email').click(function(){
+		jQuery('.loading-test').show();
+		jQuery('#test-result').html('');
+		jQuery.ajax({
+			url		: baseurl+'emailblast/sendemail',
+			type	: 'POST',
+			data	: {'plan':jQuery('#plan').val(),'preview':'','test':'1','email':jQuery('#email').val()},
+			success	: function(e){
+				jQuery('#test-result').html(e);
+				jQuery('.loading-test').hide();
+			}
+		});
+	});
+	
+	jQuery('#sendemailblast').click(function(){
+		runProggress();
+		jQuery('#result').html('');
+		jQuery.ajax({
+			url		: baseurl+'emailblast/sendemail',
+			type	: 'POST',
+			data	: {'plan':jQuery('#plan').val(),'preview':'','test':''},
 			success	: function(e){
 				jQuery('#result').html(e);
 			}

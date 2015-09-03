@@ -9,13 +9,9 @@ class Emailblast extends CI_Controller{
 		$this->myci->display_adm('theme/emailblast',$data);
 	}
 	
-	public function sendemail(){
-		if($_POST['plan']==0){
-			$url = 'http://www.balilongtermrentals.com/wp-content/plugins/bltrfunc/func/curlfunc.php';
-		}else{
-			$url = 'http://www.balivillasales.com/wp-content/plugins/villasofbali/func/curlfunc.php';
-		}
+	private function get_villas($url,$areas_prefer=''){
 		$field = 'mode=blast&posts_per_page=10';
+		if(!empty($areas_prefer)) $field .= '&areas_prefer='.$areas_prefer;
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL,  $url);
 		curl_setopt($ch, CURLOPT_POSTFIELDS,  $field);
@@ -26,13 +22,26 @@ class Emailblast extends CI_Controller{
 		$villas = curl_exec($ch);
 		curl_close($ch);
 		
+		return unserialize($villas);
+	}
+	public function sendemail(){
+		$preview = $_POST['preview'];
+		$testemail = $_POST['test'];
+		if($_POST['plan']==0){
+			$url = 'http://www.balilongtermrentals.com/wp-content/plugins/bltrfunc/func/curlfunc.php';
+		}else{
+			$url = 'http://www.balivillasales.com/wp-content/plugins/villasofbali/func/curlfunc.php';
+		}
+		
+		//$villas = $this->get_villas($url);
+		
 		$rent_logo = "http://www.balilongtermrentals.com/wp-content/uploads/2015/03/balilongtermrentals1.jpg";
 		$buy_logo = "http://www.balivillasales.com/wp-content/uploads/2015/02/sale-lease.jpg";
-		$villas = unserialize($villas);
+		
 		$data = array(
-					'villas'	=> $villas,
 					'logo'		=> ($_POST['plan']==0) ? $rent_logo : $buy_logo,
-					'web_link'	=> ($_POST['plan']==0) ? 'http://www.balilongtermrentals.com' : 'http://www.balivillasales.com'
+					'web_link'	=> ($_POST['plan']==0) ? 'http://www.balilongtermrentals.com' : 'http://www.balivillasales.com',
+					'plan'		=> $_POST['plan']
 				);
 		
 		
@@ -44,16 +53,41 @@ class Emailblast extends CI_Controller{
 						);
 		$data['emaildata'] = $email_data;
 		
-		$proggress_step['step'] = 0;
-		$step = 100 / (int) $client_email->num_rows();
-		$file = dirname(BASEPATH).'/session/proggress.json';
-		foreach($client_email->result_array() as $ce){
-			$data['cid'] = $ce['id'];
-			$email = $this->load->view('theme/email-template',$data,true);
-			$this->email($email,$ce['email'],$ce['name'],$email_data);
-			$proggress_step['step'] += $step;
-			file_put_contents($file,json_encode($proggress_step));
-			sleep(1);
+		if(!empty($preview)){
+			$data['cid'] = 0;
+			$data['villas'] = $this->get_villas($url);
+			$this->load->view('theme/email-template',$data);
+		}else{
+			if(!empty($testemail)){
+				$data['cid'] = 0;
+				$data['villas'] = $this->get_villas($url);
+				$email = $this->load->view('theme/email-template',$data,true);
+				if($this->email($email,$_POST['email'],'Mr. Bond',$email_data)){
+					echo 'Test email was sent successfully.';
+				}else{
+					echo 'Failed to send test email.';
+				}
+			}else{
+				$proggress_step['step'] = 0;
+				$proggress = 0;
+				$step_dec = (100 / (int) $client_email->num_rows());
+				$step = (int)$step_dec;
+				$file = dirname(BASEPATH).'/session/proggress.json';
+				$email_sent = 0;
+				foreach($client_email->result_array() as $ce){
+					$data['cid'] = $ce['id'];
+					$data['villas'] = $this->get_villas($url,$ce['area']);
+					$email = $this->load->view('theme/email-template',$data,true);
+					$this->email($email,$ce['email'],$ce['name'],$email_data);
+					//$this->email($email,'blaukblonk04@gmail.com',$ce['name'],$email_data);
+					$email_sent++;
+					$proggress_step['step'] += $step;
+					$proggress += $step_dec;
+					if($proggress>=98) $proggress_step['step']=100;
+					file_put_contents($file,json_encode($proggress_step));
+				}
+				echo 'Email blast was sent to '.$email_sent.' client\'s email.';
+			}
 		}
 	}
 	
@@ -72,13 +106,16 @@ class Emailblast extends CI_Controller{
 		$headers .= 'From:  '.$args['namefrom'].' <'.$args['mailfrom'].'>' . "\r\n";
 
 		// Mail it
-		mail($to, $subject, $msg, $headers);
+		return mail($to, $subject, $msg, $headers);
 	}
 	
 	private function get_client_email($plan){
-		$query = $this->db->query('SELECT c.id,c.email,c.name from fn_client c
+		$query = $this->db->query('SELECT c.id,c.email,c.name, GROUP_CONCAT(area_code separator ",") as area
+									from fn_client c
 									inner join fn_deals d on c.id=d.client
-									where d.plan="'.$plan.'" and c.email<>"" and emailblast=0');
+									inner join fn_areas_prefer ap on ap.deal_id=d.id
+									where d.plan="'.$plan.'" and c.email<>"" and emailblast=0
+									GROUP BY c.id');
 		return $query;
 	}
 	
