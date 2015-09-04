@@ -618,12 +618,17 @@ class Myci{
 			//pembuatan baris data dlm bentuk array (data berasal dari dari query)
 				$item_row[0]=$table_row; 
 				$table_row++;
+				$commission = '';
 				for($i=0;$i<$jumField;$i++){
 					if($fields[$i]=='contract_number'){
 						$text = (!empty($dts['ref_number'])) ? $dts[$fields[$i]].'-'.$dts['ref_number'] : $dts[$fields[$i]];
 						$item_row[$i+1]=anchor('deals/viewdetail/'.$dts['id'],$text,array('class'=>'button-view pop-up','title'=>'see deal details'));
 					}else{
 						$item_row[$i+1]=$dts[$fields[$i]];
+					}
+					
+					if($fields[$i]=='comm_amount'){
+						$commission = str_replace(array(',','.'),'',$dts['comm_amount']);
 					}
 				}
 				
@@ -634,7 +639,7 @@ class Myci{
 					$button_class=($dts[$value]==0) ? 'activate' : 'deactivate';
 					$button_title=($dts[$value]==0) ? 'Unpaid' : 'Paid';
 				}
-				$button_toogle = ($this->user_role=='admin' && $dts['post_status']!='Break') ? anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts['ac_id'].'-'.$dts['agent_id'],'data-type'=>$dts['type'])) : '<span class="circle-button '.$button_class.'" title="'.$button_title.'"></span>';
+				$button_toogle = ($this->user_role=='admin' && $dts['post_status']!='Break') ? anchor('#','&nbsp;',array('class'=>'circle-button status-toogle-'.$controller.'-'.$value.' '.$button_class,'title'=>$button_title,'rel'=>$dts['ac_id'].'-'.$dts['agent_id'],'comm'=>$commission,'data-type'=>$dts['type'])) : '<span class="circle-button '.$button_class.'" title="'.$button_title.'"></span>';
 				$delete_button = ($this->user_role=='admin' && $dts['post_status']!='Break') ? anchor($controller.'/delete/'.$dts['ac_id'],'<i class="fa fa-remove"></i>',array('class'=>'button_delete',"onClick"=>"return confirm('Sure want to delete this data?')")) : '';
 				$buttons=array(
 					$button_toogle,

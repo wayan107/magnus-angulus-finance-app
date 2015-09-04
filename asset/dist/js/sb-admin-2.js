@@ -259,7 +259,7 @@ jQuery(document).ready(function(){
 			jQuery.ajax({
 				type	: 'POST',
 				url		: baseurl+'agentcommission/opensetform/',
-				data	: {'rel':jQuery(this).attr('rel')},
+				data	: {'rel':jQuery(this).attr('rel'),'data-type':jQuery(this).attr('data-type'),'comm':jQuery(this).attr('comm')},
 				success	: function(e){
 					jQuery('body').append(e);
 					jQuery( ".datepicker" ).datepicker();

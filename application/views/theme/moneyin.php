@@ -7,8 +7,8 @@
 					$selected=(!empty($_POST['type'])) ? $_POST['type'] : '';
 					echo form_dropdown('type',$options,$selected,'id="type" required');
 				?>
-				From <input type="text" class="datepicker" name="date-start" id="date-start" value="<?php echo date('Y-m').'-01'; ?>" max="<?php echo date('Y-m-d'); ?>">
-				until <input type="text" class="datepicker" name="date-end" id="date-end" value="<?php echo date('Y-m-d'); ?>" max="<?php echo date('Y-m-d'); ?>">
+				From <input type="text" class="datepicker" name="date-start" id="date-start" max="<?php echo date('Y-m-d'); ?>">
+				until <input type="text" class="datepicker" name="date-end" id="date-end" max="<?php echo date('Y-m-d'); ?>">
 				<input type="submit" class="btn btn btn-primary" value="Generate">
 			</form>
 		</div>

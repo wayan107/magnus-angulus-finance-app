@@ -211,7 +211,8 @@
 		}
 		
 		public function opensetform(){
-			$this->load->view('theme/agentcommission-set-paid',array('rel'=>$_POST['rel'],'data_type'=>$_POST['data-type']));
+			$comm = explode(' ',$_POST['comm']);
+			$this->load->view('theme/agentcommission-set-paid',array('rel'=>$_POST['rel'],'data_type'=>$_POST['data-type'],'comm'=>$comm[1],'curr'=>$comm[0]));
 		}
 		
 		public function _update_commision_paid_status($data,$id){

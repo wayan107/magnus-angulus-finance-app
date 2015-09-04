@@ -23,12 +23,13 @@
 		}
 		
 		public function generate(){
-			$start=new DateTime($_POST['start'].' 00:00:00');
-			$start=$start->format('Y-m-d');
-			
-			$end=new DateTime($_POST['end'].' 00:00:00');
-			$end=$end->format('Y-m-d');
-			
+			if(!empty($_POST['start']) && !empty($_POST['end'])){
+				$start=new DateTime($_POST['start'].' 00:00:00');
+				$start=$start->format('Y-m-d');
+				
+				$end=new DateTime($_POST['end'].' 00:00:00');
+				$end=$end->format('Y-m-d');
+			}
 			if($_POST['type']=='2'){
 				$select='d.villa_code,c.name as client_name,o.name as owner_name,CONCAT(d.deal_price_currency," ",CAST(FORMAT(d.deal_price,0) as CHAR)) as deal_amount,CONCAT(d.consult_fee_currency," ",CAST(FORMAT(d.consult_fee,0) as CHAR)) as consult_fee,';
 				$select.="(SELECT GROUP_CONCAT(pp.pay_date SEPARATOR '<br>') AS date from fn_payment_plan pp where pp.deal_id=d.id and type='fee' and paid='1') as fee_date_in,
@@ -37,7 +38,10 @@
 				$table_header='Villa Code,Client,Owner,Price,Comm,Date Comm in,Amount,Deposit,Date Deposit in,Deal Date';
 				$field='villa_code,client_name,owner_name,deal_amount,consult_fee,fee_date_in,fee_amount_in,deposit,deposit_in,deal_date';
 				$innerjoin='inner join fn_payment_plan payplan on (payplan.deal_id=d.id and payplan.paid="1")';
-				$where="where payplan.pay_date between '$start' and '$end'";
+				if(!empty($start) && !empty($end))
+					$where="where payplan.pay_date between '$start' and '$end'";
+				else
+					$where = '';
 			}elseif($_POST['type']=='1'){
 				$select='d.villa_code,c.name as client_name,o.name as owner_name,d.deal_date,CONCAT(d.checkin_date," - ",d.checkout_date) as duration,';
 				$select.="(SELECT GROUP_CONCAT(CONCAT(pp.currency,' ',CAST(FORMAT(pp.amount,0) as CHAR)) SEPARATOR '<br>') as fee_amount from fn_payment_plan pp where pp.deal_id=d.id and type='deal') as fee_amount_in,";
@@ -45,7 +49,10 @@
 				$table_header='Villa Code,Client,Owner,Deal Date,Duration,Payment Plan,Price,Comm,Agent,Remark';
 				$field='villa_code,client_name,owner_name,deal_date,duration,fee_amount_in,deal_amount,consult_fee,agent,remark';
 				$innerjoin='left join fn_agent a on a.id=d.sales_agent';
-				$where="where d.deal_date between '$start' and '$end' GROUP BY d.id";
+				if(!empty($start) && !empty($end))
+					$where="where d.deal_date between '$start' and '$end' GROUP BY d.id";
+				else
+					$where = " GROUP BY d.id";
 			}elseif($_POST['type']=='3'){ 
 				$field='villa_code,client_name,owner_name,deal_date,remain_payment,consult_fee,agent';
 				$select='d.villa_code,c.name as client_name,o.name as owner_name,d.deal_date,
@@ -60,8 +67,10 @@
 				$table_header = 'Villa Code,Client,Owner,Deal Date,Remain Unpaid Comm,Comm,Agent';
 				$innerjoin = 'left join fn_agent a on a.id=d.sales_agent
 							INNER JOIN fn_payment_plan pp on (pp.deal_id=d.id and pp.paid=0 and type="fee")';
-				$where="where d.deal_date between '$start' and '$end'
-						group by d.id";
+				if(!empty($start) && !empty($end))
+					$where="where d.deal_date between '$start' and '$end' group by d.id";
+				else
+					$where = " GROUP BY d.id";
 			}
 			
 			$query=$this->db->query("select distinct $select

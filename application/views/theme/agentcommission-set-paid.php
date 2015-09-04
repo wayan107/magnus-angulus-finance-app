@@ -6,12 +6,12 @@
 			<div class="col-sm-12">
 				<p>
 					<label>Paid Amount</label>
-					<input type="number" name="paid_amount" id="paid_amount">
+					<input type="number" name="paid_amount" id="paid_amount" value="<?php echo $comm; ?>">
 				</p>
 				
 				<p>
 				<label>Currency</label>
-				<?php echo form_dropdown('currency',unserialize(CURRENCY),'','id="currency"'); ?>
+				<?php echo form_dropdown('currency',unserialize(CURRENCY),$curr,'id="currency"'); ?>
 				</p>
 				
 				<p>
